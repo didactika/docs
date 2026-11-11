@@ -266,6 +266,7 @@ for (const entry of manifest.products) {
         icon,
         directory: {published: answer.published, url: answer.published ? (docs.directory?.url ?? (product.component ? directoryPage(product.component) : null)) : null, releases: answer.releases},
         translations: docs.translations ?? {source: 'l10n'},
+        updated: product.updated,
         lines: resolution.lines.map((line) => {
             const info = product.lines.find((candidate) => candidate.id === line.id)!;
             const ids = line.pages.filter((page) => page.lang === sourceCode).map((page) => page.id);

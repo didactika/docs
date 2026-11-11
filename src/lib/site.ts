@@ -38,6 +38,8 @@ export interface ProductData {
     /** Address of the icon of the product, or null when it has none. */
     icon: string | null;
     directory: DirectoryData;
+    /** When the code of the product last changed, in seconds. */
+    updated?: number;
     lines: LineData[];
 }
 

@@ -1,8 +1,8 @@
 ---
-/** A product as a card: its icon, name, summary, the versions and languages it is documented in, and whether it is in the Moodle directory. */
+/** A product as a card: its icon, name, summary, the versions it is documented in, and whether it is in the Moodle directory. */
 import DirectoryChip from './DirectoryChip.astro';
 import MIcon from './MIcon.astro';
-import {localised, productUrl, site, t, type ProductData} from '../lib/site';
+import {localised, productUrl, t, type ProductData} from '../lib/site';
 
 interface Soon {
     component: string;
@@ -25,7 +25,6 @@ const summary = localised((product ?? soon!).summary, lang);
 const href = product ? productUrl(lang, product) : undefined;
 const Tag = href ? 'a' : 'div';
 const code = product ? (product.component ?? product.slug) : soon!.component;
-const languages = site().languages.map((language) => language.code);
 ---
 
 <Tag class:list={['d-product', {soon: !product}]} href={href}>
@@ -49,13 +48,6 @@ const languages = site().languages.map((language) => language.code);
                     ))}
                 </div>
                 <div class="d-row">
-                    <span class="d-row-label">{t(lang, 'languages')}</span>
-                    {languages.map((code) => (
-                        <span class="d-chip">
-                            <MIcon name="translate-rounded" />
-                            {code.toUpperCase()}
-                        </span>
-                    ))}
                     <DirectoryChip lang={lang} directory={product.directory} />
                 </div>
                 <div class="d-product-cta">

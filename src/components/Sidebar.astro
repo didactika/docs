@@ -4,7 +4,8 @@
  * previous and next pages follow the same list, so a reader never ends up in another version by turning the page.
  */
 import Default from '@astrojs/starlight/components/Sidebar.astro';
-import {productUrl, site, t} from '../lib/site';
+import MIcon from './MIcon.astro';
+import {localised, productUrl, site, t} from '../lib/site';
 
 const route = Astro.locals.starlightRoute;
 const data = route.entry.data as {product?: string; line?: string};
@@ -60,4 +61,22 @@ if (product && data.line) {
 }
 ---
 
+{
+    product && data.line && (
+        <div class="d-side-ctx">
+            <b>
+                <MIcon name="extension-rounded" />
+                {localised(product.title, route.lang)}
+            </b>
+            <div class="d-pillrow">
+                {[...product.lines].reverse().map((candidate) => (
+                    <a class="d-pill" href={productUrl(route.lang, product, candidate.id)} aria-current={candidate.id === data.line ? 'true' : undefined}>
+                        <MIcon name="call-split-rounded" />
+                        {candidate.label}
+                    </a>
+                ))}
+            </div>
+        </div>
+    )
+}
 <Default {...Astro.props}><slot /></Default>

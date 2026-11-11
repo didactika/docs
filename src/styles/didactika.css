@@ -201,7 +201,6 @@ dialog.d-search::backdrop { background: rgb(2 8 10 / 60%); backdrop-filter: blur
 .d-search-hit em { font: 500 0.7rem var(--mono); color: var(--accent); font-style: normal; text-transform: uppercase; letter-spacing: 0.04em; }
 
 /* Starlight shows its own search and theme controls; the header of Didactika draws them. */
-@media (max-width: 72rem) { .d-search-btn { min-width: 0; } .d-search-btn span, .d-search-btn .d-kbd { display: none; } }
 @media (max-width: 62rem) { .d-hide-md { display: none !important; } }
 
 /* ------------------------------------------------------------------ sidebar ---- */
@@ -528,7 +527,7 @@ a.d-feature:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--li
 .d-paths .d-path { margin: 0; }
 
 /* The table of contents gives way to the foot (see ProjectFoot.astro). */
-.right-sidebar { height: calc(100vh - var(--sl-nav-height, 3.75rem) - var(--d-foot-overlap, 0px)); }
+@media (min-width: 72rem) { .right-sidebar { height: calc(100vh - var(--sl-nav-height, 3.75rem) - var(--d-foot-overlap, 0px)); } }
 .d-footer { margin-top: 4rem; }
 
 .d-cardlink { display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.7rem; color: var(--accent); font: 600 0.85rem var(--font); text-decoration: none; }
@@ -541,3 +540,47 @@ a.d-feature:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--li
 .d-support h2 { margin: 0; font: 700 1.25rem/1.3 var(--display); }
 .d-support p { margin: 0.25rem 0 0; color: var(--muted); font-size: 0.92rem; }
 @media (max-width: 40rem) { .d-support { grid-template-columns: auto 1fr; } .d-support .d-btn { grid-column: 1 / -1; justify-content: center; } }
+
+/* The search sits after the product and the version, as in the design system, and takes the room that is left. */
+.d-head-search { flex: 1 1 14rem; max-width: 30rem; min-width: 0; margin-inline-start: 0.5rem; }
+.d-head-search .d-search-btn { width: 100%; min-width: 0; }
+.d-head-tools { margin-inline-start: auto; }
+
+/* Small screens: the mark alone, the search as a button, the colour and the language, and room for the button of the menu of Starlight. */
+@media (max-width: 62rem) {
+    .d-head { gap: 0.5rem; padding-inline: 0.75rem 3.9rem; }
+    .d-head-search { flex: 0 0 auto; max-width: none; margin-inline-start: auto; }
+    .d-head-search .d-search-btn { width: 2.25rem; padding: 0; justify-content: center; }
+    .d-head-search .d-search-btn span, .d-head-search .d-search-btn .d-kbd { display: none; }
+    .d-head-tools { margin-inline-start: 0; gap: 0.35rem; }
+    .d-brand .d-wordmark { display: none; }
+    .d-head-tools .d-heart, .d-head-tools .d-sep { display: none; }
+}
+@media (max-width: 26rem) {
+    .d-dd > summary .d-code { display: none; }
+}
+
+/* On a small screen the header has no room for the product and its versions, so the menu opens with them. */
+.d-side-ctx { display: none; }
+@media (max-width: 62rem) {
+    .d-side-ctx { display: grid; gap: 0.6rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--line); }
+    .d-side-ctx > b { display: flex; align-items: center; gap: 0.4rem; font: 700 1rem var(--display); }
+    .d-side-ctx > b .mi { color: var(--accent); }
+    .d-side-ctx .d-pill[aria-current='true'] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+}
+
+/* ----------------------------------------------------- home: sections and lists ---- */
+
+.d-section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.d-section-head p { margin-bottom: 0; }
+.d-stats-3 { grid-template-columns: repeat(3, 1fr); }
+.d-band-in.single { grid-template-columns: 1fr; }
+.d-empty, .d-more { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1.2rem; margin-top: 1.4rem; padding: 1.4rem 1.6rem; border: 1px dashed var(--line); border-radius: var(--radius-lg); background: var(--panel); }
+.d-empty h3, .d-more h2 { margin: 0; font: 700 1.1rem/1.3 var(--display); }
+.d-more { margin-top: 0; border-style: solid; box-shadow: var(--shadow); }
+.d-empty p, .d-more p { margin: 0.25rem 0 0; color: var(--muted); font-size: 0.92rem; }
+@media (max-width: 40rem) { .d-stats-3 { grid-template-columns: 1fr; } .d-empty, .d-more { grid-template-columns: auto 1fr; } .d-more .d-btn { grid-column: 1 / -1; justify-content: center; } }
+
+/* The header already has the colour and the language, so the menu of a small screen does not repeat them. */
+.mobile-preferences { display: none; }
+.d-pill { text-decoration: none; color: var(--ink); }

@@ -42,6 +42,8 @@ export interface SourceProduct {
     component: string | null;
     /** The icon of the plugin (`pix/icon.svg` of the default branch), when it has one. */
     iconSvg: string | null;
+    /** When the code of the product last changed, in seconds, on any of its lines. 0 when it is not known. */
+    updated: number;
     lines: SourceLine[];
     issues: Issue[];
 }
@@ -169,5 +171,7 @@ export function readProduct(repo: string, options: ReadOptions = {}): SourceProd
     const defaultPhp = defaultRef ? tryGit(repo, ['show', `${defaultRef}:version.php`]) : undefined;
     const iconSvg = defaultRef ? (tryGit(repo, ['show', `${defaultRef}:pix/icon.svg`]) ?? null) : null;
 
-    return {docs, component: defaultPhp ? readComponent(defaultPhp) : null, iconSvg, lines, issues};
+    const updated = Math.max(0, ...[...found.values()].map((ref) => Number(tryGit(repo, ['log', '-1', '--format=%ct', ref])?.trim()) || 0));
+
+    return {docs, component: defaultPhp ? readComponent(defaultPhp) : null, iconSvg, updated, lines, issues};
 }

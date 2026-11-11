@@ -43,7 +43,7 @@ const kinds = [
  * designed, and where it lives in the code. The folders come from the tool that writes the model, which names them in its own way, so the
  * order is set here and the names come from the dictionaries.
  */
-const DISCIPLINES = ['domain', 'requirements', 'analysis', 'design', 'implementation', 'quality'];
+const DISCIPLINES = ['domain', 'requirements', 'analysis', 'design', 'implementation'];
 const technicalItems = (directory: string, pageIds: string[]) => [
     {label: uiText('overview', 'Overview').en, translations: uiText('overview', 'Overview'), slug: directory},
     ...DISCIPLINES.filter((discipline) => pageIds.some((id) => id.startsWith(`technical/${discipline}/`))).map((discipline) => ({

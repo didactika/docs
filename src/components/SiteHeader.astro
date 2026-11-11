@@ -73,8 +73,11 @@ const logo = '/brand/didactika-logo.png';
         }
     </div>
 
-    <div class="d-head-tools">
+    <div class="d-head-search">
         <SiteSearch lang={lang} line={current && !current.latest ? current.id : undefined} />
+    </div>
+
+    <div class="d-head-tools">
         <LanguageMenu lang={lang} path={path} coverage={current?.coverage} />
         <span class="d-sep d-hide-md" aria-hidden="true"></span>
         {
