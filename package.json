@@ -13,6 +13,7 @@
     "dev": "node tools/sync.ts && astro dev",
     "build": "node tools/sync.ts && astro build",
     "preview": "astro preview",
+    "brand": "node tools/build-brand.ts",
     "test": "node --test \"tools/**/*.test.ts\"",
     "typecheck": "astro sync && tsc --noEmit"
   },
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
+    "sharp": "^0.35.5",
     "typescript": "^7.0.2"
   }
 }
