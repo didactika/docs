@@ -83,3 +83,21 @@ A page is `docs/<language>/<path>.md` in the repository of the product, with a f
 ## Licence
 
 GPL-3.0-or-later, as Moodle.
+
+## Technical documentation
+
+The technical documentation of a product (domain model, requirements, use cases, analysis, design, code map) lives in `docs/<language>/technical/` of its repository and is written with the **rup-flow Pro** skill ([where to get it](https://www.agensi.io/skills/rup-flow-pro-complete-rup-workflow-both-ways)). The portal shows it as the "Technical documentation" section of the product: the `README.md` of a folder is its index, the diagrams (`.svg`) and tables (`.csv`) next to a page are published with it, and links between files keep working. The colours of the diagrams are `rup/didactika.theme.json`; copy it into the `theme` key of the `rup.config.json` of the product.
+
+## Publishing
+
+The site is built and deployed by `.github/workflows/pages.yml` to <https://docs.didactika.org/> on every push to `main`, every day, and when a product repository sends the event `docs-changed`. A product repository sends it with the reusable workflow `docs-notify` of `didactika/.github`, which needs the organisation secret `DOCS_DISPATCH_TOKEN` (a fine-grained token with "Contents: read and write" on this repository).
+
+Turning it on once, by an administrator:
+
+```bash
+gh repo edit didactika/docs --visibility public --accept-visibility-change-consequences
+gh api -X POST repos/didactika/docs/pages -f build_type=workflow
+gh api -X PUT repos/didactika/docs/pages -f cname=docs.didactika.org -F https_enforced=true
+```
+
+and a `CNAME` record `docs` that points to `didactika.github.io` in the DNS of didactika.org.

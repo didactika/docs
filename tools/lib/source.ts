@@ -120,7 +120,7 @@ function filesOf(repo: string, ref: string): Map<string, string> {
             continue;
         }
         // Binary files are kept as Latin-1 text, which is lossless, and written back the same way.
-        const binary = path.startsWith('_assets/') && !/\.(?:md|mdx|svg|txt|json)$/.test(path);
+        const binary = !/\.(?:md|mdx|svg|txt|json|csv|puml)$/.test(path);
         files.set(path, git(repo, ['show', `${ref}:${name}`], binary ? 'latin1' : 'utf8'));
     }
     return files;

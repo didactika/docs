@@ -44,7 +44,10 @@ export function alertsToAsides(markdown: string): string {
 
 /** `page:` links, written as the address of the page inside `base` (`/en/plugins/local-demo/m503`). */
 export function resolvePageLinks(markdown: string, base: string): string {
-    const address = (id: string, anchor: string | undefined): string => `${base}${id === 'index' ? '/' : `/${id}/`}${anchor ?? ''}`;
+    const address = (id: string, anchor: string | undefined): string => {
+        const clean = id === 'index' ? '' : id.replace(/\/index$/, '');
+        return `${base}${clean ? `/${clean}/` : '/'}${anchor ?? ''}`;
+    };
     return outsideFences(markdown, (text) =>
         text
             // A link of Markdown: [text](page:guides/install#step-2)
@@ -89,6 +92,73 @@ export function addComponentImports(mdx: string): string {
     // The imports go after the front matter, where MDX reads them.
     const front = /^---\n[\s\S]*?\n---\n/.exec(mdx)?.[0] ?? '';
     return `${front}\n${imports.join('\n')}\n${mdx.slice(front.length)}`;
+}
+
+/**
+ * The links of a page that point at a file next to it (`../design/README.md`, `./domain-model.svg`), as the tools that write the
+ * documentation of a technical model produce them. A page becomes the address of that page in the same version and language, and a
+ * diagram or a table becomes its address among the assets of the version.
+ *
+ * `pageId` is the page inside its version (`technical/domain/index`), which says where its folder is.
+ */
+export function resolveRelativeLinks(markdown: string, pageId: string, lang: string, base: string, assetBase: string): string {
+    const folder = pageId.includes('/') ? pageId.slice(0, pageId.lastIndexOf('/')).split('/') : [];
+    return outsideFences(markdown, (text) =>
+        text.replace(/\]\(([^)\s]+)\)/g, (whole: string, target: string) => {
+            if (/^(?:[a-z][a-z0-9+.-]*:|\/|#)/i.test(target)) {
+                return whole;
+            }
+            const [file, anchor] = [target.split('#')[0], target.includes('#') ? `#${target.split('#').slice(1).join('#')}` : ''];
+            const parts = [...folder];
+            for (const part of file.split('/')) {
+                if (part === '..') {
+                    if (parts.length === 0) {
+                        return whole;
+                    }
+                    parts.pop();
+                } else if (part !== '.' && part !== '') {
+                    parts.push(part);
+                }
+            }
+            const path = parts.join('/');
+            if (/\.mdx?$/.test(path)) {
+                const id = path.replace(/\.mdx?$/, '').replace(/(^|\/)README$/, '$1index').replace(/(^|\/)index$/, '');
+                return `](${base}${id ? `/${id}` : ''}/${anchor})`;
+            }
+            return `](${assetBase}/${lang}/${path}${anchor})`;
+        }),
+    );
+}
+
+/**
+ * The first heading of a page, when the page starts with one. It is the title of the page and is taken out of the body, because the
+ * portal draws the title itself; the pages of a technical model (a use-case card, a README) have it and no front matter title, or
+ * one that does not tell the three cards of a use case apart.
+ */
+export function takeHeading(body: string): {title?: string; body: string} {
+    const match = /^\s*#\s+(.+?)\s*\n/.exec(body.replace(/\r\n/g, '\n'));
+    if (!match) {
+        return {body};
+    }
+    return {title: match[1].replace(/`/g, ''), body: body.replace(/\r\n/g, '\n').slice(match[0].length).replace(/^\n+/, '')};
+}
+
+/** A short description for a page that has none: its first paragraph of prose, without Markdown, cut at a sentence. */
+export function firstParagraph(body: string, limit = 180): string | undefined {
+    for (const block of body.replace(/\r\n/g, '\n').split(/\n{2,}/)) {
+        const text = block.trim();
+        if (text === '' || /^(?:[|#>!<\-*+`:]|\d+\.|---)/.test(text)) {
+            continue;
+        }
+        const plain = text.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/[*_`]/g, '').replace(/\s+/g, ' ');
+        if (plain.length <= limit) {
+            return plain;
+        }
+        const cut = plain.slice(0, limit);
+        const stop = cut.lastIndexOf('. ');
+        return stop > 60 ? cut.slice(0, stop + 1) : `${cut.slice(0, cut.lastIndexOf(' '))}…`;
+    }
+    return undefined;
 }
 
 export function transformBody(markdown: string, base: string, assetBase?: string): string {

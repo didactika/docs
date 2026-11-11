@@ -6,7 +6,7 @@ on:
   # Every day, so a change in the documentation of a product that did not notify this repository still reaches the site.
   schedule:
     - cron: '23 5 * * *'
-  # A product repository tells this one when its docs/ changes (see the plan, docs-notify).
+  # A product repository tells this one when its docs/ changes (the reusable workflow docs-notify of didactika/.github).
   repository_dispatch:
     types: [docs-changed]
   workflow_dispatch:
@@ -38,6 +38,9 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+        env:
+          # The foot of the site reads the people and the funding of the organisation from GitHub (tools/project.ts).
+          GITHUB_TOKEN: ${{ github.token }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

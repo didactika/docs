@@ -99,6 +99,8 @@ export interface Resolution {
 
 const PAGE = /^([A-Za-z][A-Za-z0-9_-]*)\/(.+)(\.mdx?)$/;
 const ASSETS = '_assets/';
+/** What may sit next to a page inside a language folder: its diagrams, images and tables. */
+const MEDIA = /^[A-Za-z][A-Za-z0-9_-]*\/.+\.(?:svg|png|webp|jpe?g|gif|csv|puml)$/;
 
 /** Reads the front matter of a page. */
 export function parseFrontmatter(raw: string): {data: Record<string, unknown>; body: string; error?: string} {
@@ -175,9 +177,15 @@ export function resolveProduct(lines: LineInput[], languages: LanguageDef[]): Re
             }
             const match = PAGE.exec(path);
             if (!match) {
+                // The diagrams and tables that a page of the technical documentation shows sit next to it.
+                if (MEDIA.test(path)) {
+                    assets.set(path, content);
+                }
                 continue;
             }
-            const [, lang, id, ext] = match;
+            const [, lang, rawId, ext] = match;
+            // The README of a folder is its index, as on GitHub.
+            const id = rawId.replace(/(^|\/)README$/, '$1index');
             if (!known.has(lang)) {
                 issues.push({level: 'warning', code: 'unknown-language', line: line.id, path, message: `${path} is in the language ${lang}, which is not in the registry of languages. It is ignored.`});
                 continue;

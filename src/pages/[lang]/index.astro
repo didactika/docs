@@ -4,7 +4,7 @@ import MIcon from '../../components/MIcon.astro';
 import ProductCard from '../../components/ProductCard.astro';
 import Logo from '../../components/Logo.astro';
 import Landing from '../../layouts/Landing.astro';
-import {latestLine, localised, productUrl, site, t} from '../../lib/site';
+import {latestLine, localised, productUrl, project, site, t} from '../../lib/site';
 
 export function getStaticPaths() {
     return site().languages.map((language) => ({params: {lang: language.code}}));
@@ -12,6 +12,7 @@ export function getStaticPaths() {
 
 const {lang} = Astro.params as {lang: string};
 const data = site();
+const funding = project().funding;
 const featured = data.products[0];
 const stats = {
     products: data.products.length,
@@ -25,6 +26,7 @@ const organised = [
     {icon: 'lightbulb-rounded', title: 'orgConceptsTitle', text: 'orgConceptsText'},
     {icon: 'task-alt-rounded', title: 'orgGuidesTitle', text: 'orgGuidesText'},
     {icon: 'menu-book-rounded', title: 'orgReferenceTitle', text: 'orgReferenceText'},
+    {icon: 'schema-rounded', title: 'orgTechTitle', text: 'orgTechText', href: 'https://www.agensi.io/skills/rup-flow-pro-complete-rup-workflow-both-ways', link: 'orgTechLink'},
 ];
 ---
 
@@ -99,6 +101,7 @@ const organised = [
                             <span class="d-tile soft"><MIcon name={card.icon} /></span>
                             <h3>{t(lang, card.title)}</h3>
                             <p>{t(lang, card.text)}</p>
+                            {card.href && <a class="d-cardlink" href={card.href} rel="noopener">{t(lang, card.link!)} <MIcon name="arrow-outward-rounded" /></a>}
                         </div>
                     ))
                 }
@@ -140,4 +143,20 @@ const organised = [
             </div>
         </div>
     </section>
+    {
+        funding && (
+            <section class="d-section">
+                <div class="d-wrap">
+                    <div class="d-support">
+                        <span class="d-tile"><MIcon name="favorite-rounded" /></span>
+                        <div>
+                            <h2>{t(lang, 'orgSupportTitle')}</h2>
+                            <p>{t(lang, 'orgSupportText')}</p>
+                        </div>
+                        <a class="d-btn" href={funding.url} rel="noopener">{t(lang, 'orgSupportCta')} <MIcon name="arrow-outward-rounded" /></a>
+                    </div>
+                </div>
+            </section>
+        )
+    }
 </Landing>

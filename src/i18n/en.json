@@ -95,5 +95,18 @@
   "languageFilter": "Find a language",
   "languageNone": "No language matches.",
   "pathHint": "Read them in this order; each one builds on the one before.",
-  "section.technical": "Technical documentation"
+  "section.technical": "Technical documentation",
+  "tech.domain": "Domain model",
+  "tech.requirements": "Requirements",
+  "tech.analysis": "Analysis",
+  "tech.design": "Design",
+  "tech.implementation": "Implementation",
+  "tech.quality": "Quality",
+  "tech.use-cases": "Use cases",
+  "orgTechTitle": "Technical documentation",
+  "orgTechText": "How each product is built: domain model, use cases, analysis, design and a map to the code, drawn in the colours of Didactika.",
+  "orgTechLink": "Written with rup-flow Pro",
+  "orgSupportTitle": "Support Didactika",
+  "orgSupportText": "Didactika is open source. If its plugins and this documentation help you, you can support the people who maintain them.",
+  "orgSupportCta": "Support the project"
 }

@@ -4,7 +4,7 @@
  * previous and next pages follow the same list, so a reader never ends up in another version by turning the page.
  */
 import Default from '@astrojs/starlight/components/Sidebar.astro';
-import {productUrl, site} from '../lib/site';
+import {productUrl, site, t} from '../lib/site';
 
 const route = Astro.locals.starlightRoute;
 const data = route.entry.data as {product?: string; line?: string};
@@ -29,13 +29,31 @@ function groupOf(entries: Entry[], overview: string): Entry[] | undefined {
     return undefined;
 }
 
+/**
+ * A folder of the technical documentation that holds only one page (the card of a use case) is that page, and the folder of the cards is
+ * named in the language of the reader, not by the name of the folder.
+ */
+function tidy(entries: Entry[]): Entry[] {
+    return entries.map((entry) => {
+        if (entry.type !== 'group') {
+            return entry;
+        }
+        const inner = tidy(entry.entries);
+        if (inner.length === 1 && inner[0].type === 'link') {
+            return inner[0];
+        }
+        const key = `tech.${entry.label}`;
+        return {...entry, label: t(route.lang, key) !== key ? t(route.lang, key) : entry.label, entries: inner};
+    });
+}
+
 const links = (entries: Entry[]): Array<Extract<Entry, {type: 'link'}>> => entries.flatMap((entry) => (entry.type === 'link' ? [entry] : links(entry.entries)));
 
 if (product && data.line) {
     const own = groupOf(route.sidebar, productUrl(route.lang, product, data.line));
     if (own) {
-        route.sidebar = own;
-        const all = links(own);
+        route.sidebar = tidy(own);
+        const all = links(route.sidebar);
         const here = all.findIndex((link) => link.isCurrent);
         route.pagination = {prev: here > 0 ? all[here - 1] : undefined, next: here >= 0 ? all[here + 1] : undefined};
     }

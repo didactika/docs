@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {describe, it} from 'node:test';
-import {addComponentImports, alertsToAsides, resolveAssetLinks, resolvePageLinks, transformBody} from './markdown.ts';
+import {addComponentImports, alertsToAsides, resolveAssetLinks, resolvePageLinks, transformBody, resolveRelativeLinks, takeHeading, firstParagraph} from './markdown.ts';
 
 describe('alertsToAsides', () => {
     it('turns an alert of GitHub into an aside of Starlight', () => {
@@ -104,5 +104,34 @@ describe('transformBody', () => {
 
     it('resolves the assets when it is given where they are', () => {
         assert.equal(transformBody('![A](asset:a.png)', '/en/p/m1', '/docs-assets/p/m1'), '![A](/docs-assets/p/m1/a.png)');
+    });
+});
+
+describe('the pages of a technical model', () => {
+    const base = '/en/plugins/local-demo/m405';
+    const assets = '/docs-assets/plugins/local-demo/m405';
+
+    it('turns a link to another page into its address and a link to a diagram into its asset', () => {
+        const out = resolveRelativeLinks('[card](../../design/use-cases/a/README.md#tests) ![d](./domain-model.svg) [t](traceability.csv)', 'technical/domain/index', 'en', base, assets);
+        assert.equal(out, `[card](${base}/design/use-cases/a/#tests) ![d](${assets}/en/technical/domain/domain-model.svg) [t](${assets}/en/technical/domain/traceability.csv)`);
+    });
+
+    it('leaves absolute links, anchors, schemes and code as they are', () => {
+        const text = '[a](https://x.org) [b](#top) [c](/en/x/) [d](page:guides/x)\n```\n[e](./f.md)\n```\n';
+        assert.equal(resolveRelativeLinks(text, 'technical/index', 'en', base, assets), text);
+    });
+
+    it('gives the README of a folder the address of the folder', () => {
+        assert.equal(resolveRelativeLinks('[x](./use-cases/a/README.md)', 'technical/requirements/index', 'en', base, assets), `[x](${base}/technical/requirements/use-cases/a/)`);
+    });
+
+    it('takes the first heading as the title and out of the body', () => {
+        assert.deepEqual(takeHeading('\n# UC-001 Create `delegations`\n\nText'), {title: 'UC-001 Create delegations', body: 'Text'});
+        assert.deepEqual(takeHeading('Text first\n# Later'), {body: 'Text first\n# Later'});
+    });
+
+    it('describes a page by its first paragraph of prose', () => {
+        assert.equal(firstParagraph('| a | b |\n| - | - |\n\nHow it is [built](x.md). Second sentence.'), 'How it is built. Second sentence.');
+        assert.equal(firstParagraph('| a |\n'), undefined);
     });
 });

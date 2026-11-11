@@ -15,7 +15,7 @@ interface Product {
     slug: string;
     kind: 'plugin' | 'package';
     title: Record<string, string>;
-    lines: Array<{id: string; label: string; latest: boolean; sections: string[]}>;
+    lines: Array<{id: string; label: string; latest: boolean; sections: string[]; pageIds: string[]}>;
 }
 
 const json = <T>(path: string, fallback: T): T => (existsSync(path) ? (JSON.parse(readFileSync(path, 'utf8')) as T) : fallback);
@@ -38,6 +38,21 @@ const kinds = [
     {kind: 'package', label: 'Packages', es: 'Paquetes', dir: 'packages'},
 ] as const;
 
+/**
+ * The technical documentation of a product, in the order of the method (RUP): what the product models, what it must do, how it is analysed and
+ * designed, and where it lives in the code. The folders come from the tool that writes the model, which names them in its own way, so the
+ * order is set here and the names come from the dictionaries.
+ */
+const DISCIPLINES = ['domain', 'requirements', 'analysis', 'design', 'implementation', 'quality'];
+const technicalItems = (directory: string, pageIds: string[]) => [
+    {label: uiText('overview', 'Overview').en, translations: uiText('overview', 'Overview'), slug: directory},
+    ...DISCIPLINES.filter((discipline) => pageIds.some((id) => id.startsWith(`technical/${discipline}/`))).map((discipline) => ({
+        label: uiText(`tech.${discipline}`, titleCase(discipline)).en,
+        translations: uiText(`tech.${discipline}`, titleCase(discipline)),
+        items: [{autogenerate: {directory: `${directory}/${discipline}`}}],
+    })),
+];
+
 const sidebar: NonNullable<StarlightUserConfig['sidebar']> = kinds
     .filter(({kind}) => products.some((product) => product.kind === kind))
     .map(({kind, label, es, dir}) => ({
@@ -58,7 +73,12 @@ const sidebar: NonNullable<StarlightUserConfig['sidebar']> = kinds
                         ...line.sections.map((section) => ({
                             label: uiText(`section.${section}`, titleCase(section)).en,
                             translations: uiText(`section.${section}`, titleCase(section)),
-                            items: [{autogenerate: {directory: `${dir}/${product.slug}/${line.id}/${section}`}}],
+                            // Only the section of the page the reader is on is open, so the whole map of the product fits in view.
+                            collapsed: true,
+                            items:
+                                section === 'technical'
+                                    ? technicalItems(`${dir}/${product.slug}/${line.id}/technical`, line.pageIds)
+                                    : [{autogenerate: {directory: `${dir}/${product.slug}/${line.id}/${section}`}}],
                         })),
                     ],
                 })),

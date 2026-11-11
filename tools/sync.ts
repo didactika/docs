@@ -30,7 +30,7 @@ import {existsSync, mkdirSync, readdirSync, readFileSync, rmdirSync, rmSync, wri
 import {dirname, join, resolve} from 'node:path';
 import {stringify} from 'yaml';
 import {branchesOf, checkDirectory, directoryPage, type Cache, type DirectoryAnswer} from './lib/directory.ts';
-import {addComponentImports, transformBody} from './lib/markdown.ts';
+import {addComponentImports, firstParagraph, resolveRelativeLinks, takeHeading, transformBody} from './lib/markdown.ts';
 import {parseFrontmatter, resolveProduct, type Issue, type LanguageDef} from './lib/resolve.ts';
 import {readProduct, type DocsJson} from './lib/source.ts';
 
@@ -162,14 +162,14 @@ function frontmatter(data: Record<string, unknown>, extra: Record<string, unknow
 }
 
 /** The folders the pages of a version are in, in the order the navigation shows them: the usual ones first, then the rest. */
-const USUAL_SECTIONS = ['getting-started', 'concepts', 'guides', 'reference'];
+const USUAL_SECTIONS = ['getting-started', 'concepts', 'guides', 'reference', 'technical'];
 const sectionsOf = (ids: string[]): string[] =>
     [...new Set(ids.filter((id) => id.includes('/')).map((id) => id.split('/')[0]))].sort((a, b) => {
         const rank = (name: string): number => (USUAL_SECTIONS.includes(name) ? USUAL_SECTIONS.indexOf(name) : USUAL_SECTIONS.length);
         return rank(a) - rank(b) || a.localeCompare(b);
     });
 
-const isText = (path: string): boolean => /\.(?:md|mdx|svg|txt|json)$/.test(path);
+const isText = (path: string): boolean => /\.(?:md|mdx|svg|txt|json|csv|puml)$/.test(path);
 
 const issues: Array<Issue & {product: string}> = [];
 const products: Array<Record<string, unknown>> = [];
@@ -207,7 +207,22 @@ for (const entry of manifest.products) {
         }
 
         for (const page of line.pages) {
-            const {data, body} = parseFrontmatter(page.shown.content);
+            const parsed = parseFrontmatter(page.shown.content);
+            // A page that starts with a heading (a README, a card of a technical model) is titled by it.
+            const heading = takeHeading(parsed.body);
+            const data: Record<string, unknown> = {...parsed.data, ...(heading.title ? {title: heading.title} : {})};
+            if (!data.description) {
+                const described = firstParagraph(heading.body);
+                if (described) {
+                    data.description = described;
+                }
+            }
+            // The keys the tools of a technical model put in the front matter are theirs; one of them (id) would rename the page.
+            for (const key of ['id', 'name', 'actor', 'package', 'origin', 'sourceOfTruth', 'requirement', 'includes', 'extends']) {
+                delete data[key];
+            }
+            const body = heading.body;
+            const rewrite = (text: string, to: string): string => resolveRelativeLinks(transformBody(text, to, assetBase), page.id, page.shown.lang, to, assetBase);
             const note =
                 page.status === 'missing' || page.status === 'outdated'
                     ? {content: ui(page.lang, page.status === 'missing' ? 'translationMissing' : 'translationOutdated', {language: languages.find((l) => l.code === page.lang)!.name})}
@@ -225,10 +240,10 @@ for (const entry of manifest.products) {
             const base = join(content, page.lang, kindDir, docs.slug);
             const address = `/${page.lang}/${kindDir}/${docs.slug}`;
             const finish = (text: string): string => (page.shown.ext === '.mdx' ? addComponentImports(text) : text);
-            write(join(base, line.id, `${page.id}${page.shown.ext}`), finish(frontmatter(data, extra) + transformBody(body, `${address}/${line.id}`, assetBase)));
+            write(join(base, line.id, `${page.id}${page.shown.ext}`), finish(frontmatter(data, extra) + rewrite(body, `${address}/${line.id}`)));
             // The address without a version shows the newest one, its links stay in that address and the search does not index it twice.
             if (line.id === newest.id) {
-                write(join(base, `${page.id}${page.shown.ext}`), finish(frontmatter(data, {...extra, pagefind: false}) + transformBody(body, address, assetBase)));
+                write(join(base, `${page.id}${page.shown.ext}`), finish(frontmatter(data, {...extra, pagefind: false}) + rewrite(body, address)));
             }
         }
     }
