@@ -10,3 +10,5 @@ dist/
 
 # What the previews of a developer need; see compose.yaml.
 /preview.refs.json
+/public/docs-assets/
+/public/product-icons/

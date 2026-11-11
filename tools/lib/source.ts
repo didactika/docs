@@ -38,6 +38,10 @@ export interface SourceLine extends LineInput {
 
 export interface SourceProduct {
     docs: DocsJson | null;
+    /** The component of Moodle (`local_delegateaccount`), from the `version.php` of the default branch. */
+    component: string | null;
+    /** The icon of the plugin (`pix/icon.svg` of the default branch), when it has one. */
+    iconSvg: string | null;
     lines: SourceLine[];
     issues: Issue[];
 }
@@ -64,6 +68,9 @@ export const lineLabel = (low: number, high: number): string =>
     low === high ? `Moodle ${moodleVersion(low)}` : `Moodle ${moodleVersion(low)} – ${moodleVersion(high)}`;
 
 /** Reads the identity of a line from the `version.php` of its branch. */
+/** The component of a plugin, from its `version.php`. */
+export const readComponent = (php: string): string | null => /\$plugin->component\s*=\s*['"]([^'"]+)['"]/.exec(php)?.[1] ?? null;
+
 export function readVersionPhp(php: string): {id: string; release: string; low: number; high: number} | undefined {
     const release = /\$plugin->release\s*=\s*['"]([^'"]+)['"]/.exec(php)?.[1];
     const id = release ? /-m(\d+)$/.exec(release)?.[1] : undefined;
@@ -159,5 +166,8 @@ export function readProduct(repo: string, options: ReadOptions = {}): SourceProd
         line.extends = declared && 'extends' in declared ? (declared.extends ?? null) : index === 0 ? null : lines[index - 1].id;
     });
 
-    return {docs, lines, issues};
+    const defaultPhp = defaultRef ? tryGit(repo, ['show', `${defaultRef}:version.php`]) : undefined;
+    const iconSvg = defaultRef ? (tryGit(repo, ['show', `${defaultRef}:pix/icon.svg`]) ?? null) : null;
+
+    return {docs, component: defaultPhp ? readComponent(defaultPhp) : null, iconSvg, lines, issues};
 }

@@ -1,0 +1,144 @@
+---
+/** The home of the portal: what it is, what is documented and how every documentation is organised. */
+import MIcon from '../../components/MIcon.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import DirectoryChip from '../../components/DirectoryChip.astro';
+import Landing from '../../layouts/Landing.astro';
+import {latestLine, localised, productUrl, site, t} from '../../lib/site';
+
+export function getStaticPaths() {
+    return site().languages.map((language) => ({params: {lang: language.code}}));
+}
+
+const {lang} = Astro.params as {lang: string};
+const data = site();
+const featured = data.products[0];
+const stats = {
+    products: data.products.length,
+    versions: data.products.reduce((sum, product) => sum + product.lines.length, 0),
+    languages: data.languages.length,
+    pages: data.products.reduce((sum, product) => sum + product.lines.reduce((total, line) => total + line.pages, 0), 0) * data.languages.length,
+};
+
+const organised = [
+    {icon: 'rocket-launch-rounded', title: 'orgStartTitle', text: 'orgStartText'},
+    {icon: 'lightbulb-rounded', title: 'orgConceptsTitle', text: 'orgConceptsText'},
+    {icon: 'task-alt-rounded', title: 'orgGuidesTitle', text: 'orgGuidesText'},
+    {icon: 'menu-book-rounded', title: 'orgReferenceTitle', text: 'orgReferenceText'},
+];
+---
+
+<Landing lang={lang} title={`Didactika Docs · ${t(lang, 'heroTitleB')}`} description={t(lang, 'heroLead')}>
+    <section class="d-hero">
+        <div class="d-wrap d-hero-in">
+            <div>
+                <span class="d-eyebrow-pill"><MIcon name="verified-rounded" /> {t(lang, 'heroEyebrow')}</span>
+                <h1 class="d-h1">{t(lang, 'heroTitleA')} <em>{t(lang, 'heroTitleB')}</em></h1>
+                <p class="d-hero-lead">{t(lang, 'heroLead')}</p>
+                <div class="d-actions">
+                    <a class="d-btn" href={`/${lang}/plugins/`}>{t(lang, 'heroCta')} <MIcon name="arrow-forward-rounded" /></a>
+                    <a class="d-btn ghost" href="#organised">{t(lang, 'heroCtaSecondary')} <MIcon name="arrow-forward-rounded" /></a>
+                </div>
+            </div>
+            <div class="d-hero-card" aria-hidden="true">
+                <span class="d-mono">Didactika Docs / {featured ? localised(featured.title, lang) : 'Didactika'}</span>
+                <div class="d-hero-tile"><img src={featured?.icon ?? '/brand/didactika-logo.png'} alt="" /></div>
+                {
+                    featured && (
+                        <div class="d-hero-chips">
+                            {[...featured.lines].reverse().map((line) => <span class:list={['d-chip', {accent: line.latest}]}>{line.label}</span>)}
+                            {data.languages.map((language) => <span class="d-chip"><MIcon name="translate-rounded" />{language.code.toUpperCase()}</span>)}
+                            <DirectoryChip lang={lang} directory={featured.directory} />
+                        </div>
+                    )
+                }
+            </div>
+        </div>
+    </section>
+
+    <div class="d-wrap">
+        <div class="d-stats">
+            <div class="d-stat"><b>{stats.products}</b><span><MIcon name="extension-rounded" />{t(lang, 'statProducts')}</span></div>
+            <div class="d-stat"><b>{stats.versions}</b><span><MIcon name="layers-rounded" />{t(lang, 'statVersions')}</span></div>
+            <div class="d-stat"><b>{stats.languages}</b><span><MIcon name="translate-rounded" />{t(lang, 'statLanguages')}</span></div>
+            <div class="d-stat"><b>{stats.pages}</b><span><MIcon name="article-rounded" />{t(lang, 'statPages')}</span></div>
+        </div>
+    </div>
+
+    <section class="d-section" id="products">
+        <div class="d-wrap">
+            <h2>{t(lang, 'productsTitle')}</h2>
+            <p>{t(lang, 'productsLead')}</p>
+            <div class="d-grid">
+                {data.products.map((product) => <ProductCard lang={lang} product={product} />)}
+            </div>
+        </div>
+    </section>
+
+    {
+        data.coming.length > 0 && (
+            <section class="d-section">
+                <div class="d-wrap">
+                    <h2>{t(lang, 'comingTitle')}</h2>
+                    <p>{t(lang, 'comingLead')}</p>
+                    <div class="d-grid">
+                        {data.coming.map((soon) => <ProductCard lang={lang} soon={soon} />)}
+                    </div>
+                </div>
+            </section>
+        )
+    }
+
+    <section class="d-section" id="organised">
+        <div class="d-wrap">
+            <h2>{t(lang, 'organisedTitle')}</h2>
+            <p>{t(lang, 'organisedLead')}</p>
+            <div class="d-cards">
+                {
+                    organised.map((card) => (
+                        <div class="d-card">
+                            <span class="d-tile soft"><MIcon name={card.icon} /></span>
+                            <h3>{t(lang, card.title)}</h3>
+                            <p>{t(lang, card.text)}</p>
+                        </div>
+                    ))
+                }
+            </div>
+        </div>
+    </section>
+
+    <section class="d-band">
+        <div class="d-wrap d-band-in">
+            <div>
+                <h2>{t(lang, 'versionsTitle')}</h2>
+                <p>{t(lang, 'versionsText')}</p>
+                {
+                    featured && (
+                        <div class="d-pillrow">
+                            {[...featured.lines].reverse().map((line) => (
+                                <a class="d-pill" href={productUrl(lang, featured, line.id)}>
+                                    <MIcon name="call-split-rounded" />
+                                    {line.label}
+                                    <small>{line.release}</small>
+                                </a>
+                            ))}
+                        </div>
+                    )
+                }
+            </div>
+            <div>
+                <h2>{t(lang, 'languagesTitle')}</h2>
+                <p>{t(lang, 'languagesText')}</p>
+                <div class="d-pillrow">
+                    {data.languages.map((language) => (
+                        <a class="d-pill" href={`/${language.code}/`} hreflang={language.code}>
+                            <MIcon name="language-rounded" />
+                            {language.name}
+                            <small>{language.code.toUpperCase()}</small>
+                        </a>
+                    ))}
+                </div>
+            </div>
+        </div>
+    </section>
+</Landing>

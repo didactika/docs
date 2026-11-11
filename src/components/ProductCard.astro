@@ -1,0 +1,79 @@
+---
+/** A product as a card: its icon, name, summary, the versions and languages it is documented in, and whether it is in the Moodle directory. */
+import DirectoryChip from './DirectoryChip.astro';
+import MIcon from './MIcon.astro';
+import {localised, productUrl, site, t, type ProductData} from '../lib/site';
+
+interface Soon {
+    component: string;
+    repo: string;
+    title: Record<string, string>;
+    summary: Record<string, string>;
+    published: boolean | null;
+}
+
+interface Props {
+    lang: string;
+    product?: ProductData;
+    /** A product that is not documented yet. */
+    soon?: Soon;
+}
+
+const {lang, product, soon} = Astro.props;
+const title = localised((product ?? soon!).title, lang);
+const summary = localised((product ?? soon!).summary, lang);
+const href = product ? productUrl(lang, product) : undefined;
+const Tag = href ? 'a' : 'div';
+const code = product ? (product.component ?? product.slug) : soon!.component;
+const languages = site().languages.map((language) => language.code);
+---
+
+<Tag class:list={['d-product', {soon: !product}]} href={href}>
+    <div class="d-product-top">
+        <span class:list={['d-tile', {soft: !product?.icon}]}>
+            {product?.icon ? <img src={product.icon} alt="" loading="lazy" /> : <MIcon name="extension-rounded" />}
+        </span>
+        <div>
+            <h3>{title}</h3>
+            <code>{code}</code>
+        </div>
+    </div>
+    <p>{summary}</p>
+    {
+        product && (
+            <>
+                <div class="d-row">
+                    <span class="d-row-label">{t(lang, 'versions')}</span>
+                    {[...product.lines].reverse().map((line) => (
+                        <span class:list={['d-chip', {accent: line.latest}]}>{line.label}</span>
+                    ))}
+                </div>
+                <div class="d-row">
+                    <span class="d-row-label">{t(lang, 'languages')}</span>
+                    {languages.map((code) => (
+                        <span class="d-chip">
+                            <MIcon name="translate-rounded" />
+                            {code.toUpperCase()}
+                        </span>
+                    ))}
+                    <DirectoryChip lang={lang} directory={product.directory} />
+                </div>
+                <div class="d-product-cta">
+                    <span>{t(lang, 'openDocs')}</span>
+                    <MIcon name="arrow-forward-rounded" />
+                </div>
+            </>
+        )
+    }
+    {
+        soon && (
+            <div class="d-row">
+                <span class="d-chip warn">
+                    <MIcon name="schedule-rounded" />
+                    {t(lang, 'comingTitle')}
+                </span>
+                <DirectoryChip lang={lang} directory={{published: soon.published, url: null, releases: []}} />
+            </div>
+        )
+    }
+</Tag>

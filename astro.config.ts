@@ -77,9 +77,19 @@ export default defineConfig({
             description: 'The documentation of the Moodle plugins and the npm packages of Didactika.',
             defaultLocale: 'en',
             locales,
-            logo: {src: './src/assets/didactika-logo.png', alt: 'Didactika'},
+            // The header, the title of a page, the navigation and the foot are drawn by the components of Didactika (src/components).
+            components: {
+                Header: './src/components/Header.astro',
+                PageTitle: './src/components/PageTitle.astro',
+                Sidebar: './src/components/Sidebar.astro',
+                Footer: './src/components/Footer.astro',
+            },
             favicon: '/brand/favicon.ico',
             head: [
+                {
+                    tag: 'script',
+                    content: "(function(){var a=new URLSearchParams(location.search).get('mode');if(a==='dark'||a==='light'){try{localStorage.setItem('starlight-theme',a);}catch(e){}document.documentElement.dataset.theme=a;}})();",
+                },
                 {tag: 'link', attrs: {rel: 'icon', href: '/brand/favicon.svg', type: 'image/svg+xml'}},
                 {tag: 'link', attrs: {rel: 'icon', href: '/brand/favicon-32x32.png', sizes: '32x32', type: 'image/png'}},
                 {tag: 'link', attrs: {rel: 'icon', href: '/brand/favicon-16x16.png', sizes: '16x16', type: 'image/png'}},

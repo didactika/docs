@@ -1,0 +1,121 @@
+---
+/**
+ * The head of a page of the documentation: where the page is (product, section), the title and the lead, and what is worth knowing about it
+ * in the version the reader is in. The first page of a product also shows what the product is.
+ */
+import DirectoryChip from './DirectoryChip.astro';
+import MIcon from './MIcon.astro';
+import {localised, pageIdOf, productUrl, site, t} from '../lib/site';
+
+const route = Astro.locals.starlightRoute;
+const data = route.entry.data as {title: string; description?: string; product?: string; line?: string; provenance?: string; provenanceFrom?: string};
+const lang = route.lang;
+const product = site().products.find((candidate) => candidate.slug === data.product);
+const line = product?.lines.find((candidate) => candidate.id === data.line);
+
+const pageId = product && line ? pageIdOf(route.id, product.slug, line.id) : undefined;
+const section = pageId?.includes('/') ? pageId.split('/')[0] : undefined;
+const isHome = pageId === 'index';
+const lineLabel = (id?: string): string => product?.lines.find((candidate) => candidate.id === id)?.label ?? id ?? '';
+const compared = product !== undefined && product.lines.length > 1;
+const kindLabel = product?.kind === 'plugin' ? t(lang, 'plugins') : t(lang, 'packages');
+---
+
+<div class="d-title">
+    {
+        product && line && (
+            <>
+                <span hidden data-pagefind-filter="line[data-value]" data-value={line.id} />
+                <span hidden data-pagefind-filter="latest[data-value]" data-value={String(line.latest)} />
+                <nav class="d-eyebrow" aria-label="Breadcrumb">
+                    <a href={`/${lang}/${product.kind === 'plugin' ? 'plugins' : 'packages'}/`}>{kindLabel}</a>
+                    <MIcon name="chevron-right-rounded" />
+                    <a href={productUrl(lang, product, line.id)}>{localised(product.title, lang)}</a>
+                    {section && (
+                        <>
+                            <MIcon name="chevron-right-rounded" />
+                            <span>{t(lang, `section.${section}`)}</span>
+                        </>
+                    )}
+                </nav>
+            </>
+        )
+    }
+
+    {
+        isHome && product ? (
+            <div class="d-product-head">
+                <span class:list={['d-tile', {soft: !product.icon}]}>{product.icon ? <img src={product.icon} alt="" /> : <MIcon name="extension-rounded" />}</span>
+                <h1 id="_top">{data.title}</h1>
+            </div>
+        ) : (
+            <h1 id="_top">{data.title}</h1>
+        )
+    }
+    {data.description && <p class="d-lead">{data.description}</p>}
+
+    {
+        product && line && (
+            <div class="d-meta">
+                <span class="d-chip accent">
+                    <MIcon name="call-split-rounded" />
+                    {line.label}
+                </span>
+                {compared && data.provenance === 'inherited' && (
+                    <span class="d-chip">
+                        <MIcon name="history-rounded" />
+                        {t(lang, 'inheritedFrom', {line: lineLabel(data.provenanceFrom)})}
+                    </span>
+                )}
+                {compared && data.provenance === 'modified' && (
+                    <span class="d-chip warn">
+                        <MIcon name="edit-rounded" />
+                        {t(lang, 'changedIn', {line: line.label})}
+                    </span>
+                )}
+                {compared && data.provenance === 'added' && (
+                    <span class="d-chip ok">
+                        <MIcon name="add-circle-rounded" />
+                        {t(lang, 'addedIn', {line: line.label})}
+                    </span>
+                )}
+                {isHome && <DirectoryChip lang={lang} directory={product.directory} />}
+            </div>
+        )
+    }
+
+    {
+        isHome && product && line && (
+            <dl class="d-facts">
+                <div class="d-fact">
+                    <span>{t(lang, 'requires')}</span>
+                    <b>
+                        <MIcon name="school-rounded" />
+                        {line.label}
+                    </b>
+                </div>
+                <div class="d-fact">
+                    <span>{t(lang, 'release')}</span>
+                    <b>
+                        <MIcon name="sell-rounded" />
+                        {line.release}
+                    </b>
+                </div>
+                <div class="d-fact">
+                    <span>{t(lang, 'versions')}</span>
+                    <b>
+                        <MIcon name="layers-rounded" />
+                        {product.lines.length}
+                    </b>
+                </div>
+                <div class="d-fact">
+                    <span>{t(lang, 'repository')}</span>
+                    <b>
+                        <MIcon name="code-rounded" />
+                        <a href={`https://github.com/${product.repo}`}>{product.repo.split('/')[1].replace(/^moodle-/, '')}</a>
+                    </b>
+                </div>
+            </dl>
+        )
+    }
+</div>

@@ -1,0 +1,32 @@
+---
+/** The catalog of the plugins of Didactika. */
+import MIcon from '../../../components/MIcon.astro';
+import ProductCard from '../../../components/ProductCard.astro';
+import Landing from '../../../layouts/Landing.astro';
+import {productsOf, site, t} from '../../../lib/site';
+
+export function getStaticPaths() {
+    return site().languages.map((language) => ({params: {lang: language.code}}));
+}
+
+const {lang} = Astro.params as {lang: string};
+const plugins = productsOf('plugin');
+---
+
+<Landing lang={lang} title={`${t(lang, 'plugins')} · Didactika Docs`} description={t(lang, 'pluginsDescription')}>
+    <section class="d-section">
+        <div class="d-wrap">
+            <nav class="d-eyebrow" aria-label="Breadcrumb">
+                <a href={`/${lang}/`}>{t(lang, 'home')}</a>
+                <MIcon name="chevron-right-rounded" />
+                <span>{t(lang, 'plugins')}</span>
+            </nav>
+            <h2 style="margin-top:0.6rem;font-size:2.4rem">{t(lang, 'plugins')}</h2>
+            <p>{t(lang, 'pluginsDescription')} {t(lang, 'productsLead')}</p>
+            <div class="d-grid">
+                {plugins.map((product) => <ProductCard lang={lang} product={product} />)}
+                {site().coming.map((soon) => <ProductCard lang={lang} soon={soon} />)}
+            </div>
+        </div>
+    </section>
+</Landing>

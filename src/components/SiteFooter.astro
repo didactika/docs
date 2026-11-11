@@ -1,0 +1,46 @@
+---
+// The foot of the home and of the catalog.
+import MIcon from './MIcon.astro';
+import {localised, productUrl, site, t} from '../lib/site';
+
+interface Props {
+    lang: string;
+}
+
+const {lang} = Astro.props;
+const products = site().products;
+---
+
+<footer class="d-foot">
+    <div class="d-foot-in">
+        <div>
+            <a class="d-brand" href={`/${lang}/`}>
+                <img src="/brand/favicon.svg" alt="" width="36" height="36" />
+                <span class="d-wordmark"><b>Didactika Docs</b><small>{t(lang, 'brandBy')}</small></span>
+            </a>
+            <p>{t(lang, 'heroLead')}</p>
+        </div>
+        <div>
+            <h4>{t(lang, 'footerProducts')}</h4>
+            <ul>
+                {products.map((product) => <li><a href={productUrl(lang, product)}>{localised(product.title, lang)}</a></li>)}
+                <li><a href={`/${lang}/plugins/`}>{t(lang, 'plugins')}</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>{t(lang, 'footerOrg')}</h4>
+            <ul>
+                <li><a href="https://github.com/didactika">{t(lang, 'footerOrgLink')}</a></li>
+                <li><a href="https://moodle-design.didactika.org/">{t(lang, 'footerDesign')}</a></li>
+                <li><a href="https://github.com/didactika/docs">{t(lang, 'footerSource')}</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>{t(lang, 'language')}</h4>
+            <ul>
+                {site().languages.map((language) => <li><a href={`/${language.code}/`} hreflang={language.code}>{language.name}</a></li>)}
+            </ul>
+        </div>
+    </div>
+    <div class="d-foot-bar">{t(lang, 'footerLicence')}</div>
+</footer>

@@ -1,0 +1,55 @@
+---
+/**
+ * The layout of the pages that are not documentation (the home and the catalog): the same header, colours and fonts as the documentation,
+ * without the navigation of a product.
+ */
+import '../styles/didactika.css';
+import SiteFooter from '../components/SiteFooter.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import {site, t} from '../lib/site';
+
+interface Props {
+    lang: string;
+    title: string;
+    description: string;
+}
+
+const {lang, title, description} = Astro.props;
+const language = site().languages.find((candidate) => candidate.code === lang);
+---
+
+<!doctype html>
+<html lang={lang} dir={language?.dir ?? 'ltr'}>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        <link rel="icon" href="/brand/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/brand/favicon-32x32.png" sizes="32x32" type="image/png" />
+        <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content="https://docs.didactika.org/brand/og-image.png" />
+        {site().languages.map((candidate) => <link rel="alternate" hreflang={candidate.code} href={`/${candidate.code}/`} />)}
+        <script is:inline>
+            // The colour theme before the first paint, from the same key Starlight uses.
+            (function () {
+                var theme = null;
+                // ?mode=dark or ?mode=light opens the page in that theme, as in the design system.
+                var asked = new URLSearchParams(location.search).get('mode');
+                try { if (asked === 'dark' || asked === 'light') { localStorage.setItem('starlight-theme', asked); } theme = localStorage.getItem('starlight-theme'); } catch (error) { theme = asked; }
+                if (theme !== 'light' && theme !== 'dark') { theme = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; }
+                document.documentElement.dataset.theme = theme;
+            })();
+        </script>
+    </head>
+    <body>
+        <div class="d-page">
+            <a class="d-skip" href="#main">{t(lang, 'home')}</a>
+            <header class="d-top"><SiteHeader lang={lang} path={Astro.url.pathname} /></header>
+            <main id="main" class="d-main"><slot /></main>
+            <SiteFooter lang={lang} />
+        </div>
+    </body>
+</html>

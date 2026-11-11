@@ -1,0 +1,134 @@
+---
+/**
+ * The search of the site: a button that looks like the one of the design system and a dialog with the results of Pagefind, which Starlight
+ * indexes when the site is built. It only searches the version the reader is in (or the newest, outside a product) so a page that two
+ * versions share does not come up twice.
+ */
+import MIcon from './MIcon.astro';
+import {t} from '../lib/site';
+
+interface Props {
+    lang: string;
+    /** The version of the page, when it is not the newest: the search is limited to it. */
+    line?: string;
+}
+
+const {lang, line} = Astro.props;
+---
+
+<button type="button" class="d-search-btn" data-open-search aria-haspopup="dialog" aria-label={t(lang, 'searchLabel')}>
+    <MIcon name="search-rounded" />
+    <span>{t(lang, 'search')}</span>
+    <kbd class="d-kbd">Ctrl K</kbd>
+</button>
+
+<dialog
+    class="d-search"
+    aria-label={t(lang, 'searchLabel')}
+    data-line={line}
+    data-hint={t(lang, 'searchHint')}
+    data-empty={t(lang, 'searchEmpty', {q: '{q}'})}
+    data-built={t(lang, 'searchBuilt')}
+>
+    <div class="d-search-field">
+        <MIcon name="search-rounded" />
+        <input type="search" autocomplete="off" spellcheck="false" placeholder={t(lang, 'searchPlaceholder')} aria-label={t(lang, 'searchLabel')} />
+        <button type="button" class="d-iconbtn" data-close-search aria-label={t(lang, 'close')}><MIcon name="close-rounded" /></button>
+    </div>
+    <div class="d-search-body" aria-live="polite"><p class="d-search-note">{t(lang, 'searchHint')}</p></div>
+</dialog>
+
+<script>
+    const button = document.querySelector<HTMLButtonElement>('[data-open-search]');
+    const dialog = document.querySelector<HTMLDialogElement>('dialog.d-search');
+    if (button && dialog) {
+        const input = dialog.querySelector<HTMLInputElement>('input')!;
+        const body = dialog.querySelector<HTMLElement>('.d-search-body')!;
+        const line = dialog.dataset.line;
+        let engine: any;
+        let timer: number | undefined;
+
+        const note = (text: string): void => {
+            const p = document.createElement('p');
+            p.className = 'd-search-note';
+            p.textContent = text;
+            body.replaceChildren(p);
+        };
+
+        const load = async (): Promise<any> => {
+            if (engine === undefined) {
+                try {
+                    const url = '/pagefind/pagefind.js';
+                    engine = await import(/* @vite-ignore */ url);
+                    await engine.init();
+                } catch {
+                    engine = null;
+                }
+            }
+            return engine;
+        };
+
+        const search = async (query: string): Promise<void> => {
+            if (query.trim().length < 2) {
+                note(dialog.dataset.hint ?? '');
+                return;
+            }
+            const pagefind = await load();
+            if (!pagefind) {
+                note(dialog.dataset.built ?? '');
+                return;
+            }
+            let found: any;
+            try {
+                found = await pagefind.search(query, {filters: line ? {line} : {latest: 'true'}});
+            } catch {
+                found = await pagefind.search(query);
+            }
+            const hits = await Promise.all(found.results.slice(0, 8).map((result: any) => result.data()));
+            if (hits.length === 0) {
+                note((dialog.dataset.empty ?? '').replace('{q}', query));
+                return;
+            }
+            body.replaceChildren(
+                ...hits.map((hit: any) => {
+                    const a = document.createElement('a');
+                    a.className = 'd-search-hit';
+                    a.href = hit.url;
+                    const title = document.createElement('b');
+                    title.textContent = String(hit.meta?.title ?? hit.url);
+                    const excerpt = document.createElement('span');
+                    // The excerpt comes from the index of the site itself, with <mark> around the words that matched.
+                    excerpt.innerHTML = hit.excerpt;
+                    a.append(title, excerpt);
+                    return a;
+                }),
+            );
+        };
+
+        const open = (): void => {
+            if (!dialog.open) {
+                dialog.showModal();
+            }
+            input.focus();
+            input.select();
+        };
+
+        button.addEventListener('click', open);
+        dialog.querySelector('[data-close-search]')?.addEventListener('click', () => dialog.close());
+        dialog.addEventListener('click', (event) => {
+            if (event.target === dialog) {
+                dialog.close();
+            }
+        });
+        input.addEventListener('input', () => {
+            window.clearTimeout(timer);
+            timer = window.setTimeout(() => void search(input.value), 120);
+        });
+        document.addEventListener('keydown', (event) => {
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+                event.preventDefault();
+                open();
+            }
+        });
+    }
+</script>

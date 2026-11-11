@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {describe, it} from 'node:test';
-import {alertsToAsides, resolvePageLinks, transformBody} from './markdown.ts';
+import {addComponentImports, alertsToAsides, resolveAssetLinks, resolvePageLinks, transformBody} from './markdown.ts';
 
 describe('alertsToAsides', () => {
     it('turns an alert of GitHub into an aside of Starlight', () => {
@@ -41,14 +41,67 @@ describe('resolvePageLinks', () => {
         assert.equal(resolvePageLinks('[home](page:index)', base), '[home](/en/plugins/local-demo/m503/)');
     });
 
+    it('points the href of a component at the page too', () => {
+        assert.equal(resolvePageLinks('<Feature href="page:getting-started/quick-start" title="x" />', base), '<Feature href="/en/plugins/local-demo/m503/getting-started/quick-start/" title="x" />');
+        assert.equal(resolvePageLinks("<Feature href='page:index#top' />", base), "<Feature href='/en/plugins/local-demo/m503/#top' />");
+    });
+
     it('does not touch ordinary links or fenced code', () => {
         const text = '[a](https://example.org) and\n```\n[b](page:guides/a)\n```';
         assert.equal(resolvePageLinks(text, base), text);
     });
 });
 
+describe('resolveAssetLinks', () => {
+    const base = '/docs-assets/plugins/local-demo/m405';
+
+    it('points an image, a link and an attribute at the file of the version', () => {
+        assert.equal(
+            resolveAssetLinks('![A](asset:a.png) [b](asset:files/b.pdf) <Screenshot src="asset:c.png" />', base),
+            `![A](${base}/a.png) [b](${base}/files/b.pdf) <Screenshot src="${base}/c.png" />`,
+        );
+    });
+
+    it('does not touch fenced code', () => {
+        const code = '```md\n![A](asset:a.png)\n```';
+        assert.equal(resolveAssetLinks(code, base), code);
+    });
+});
+
+describe('addComponentImports', () => {
+    it('imports the components of Starlight a page uses, together and only those', () => {
+        const out = addComponentImports('---\ntitle: A\n---\n\n<Steps>\n1. One\n</Steps>\n\n<CardGrid><Card title="x" /></CardGrid>\n');
+        assert.ok(out.includes("import {Steps, Card, CardGrid} from '@astrojs/starlight/components';"));
+        assert.ok(!out.includes('Tabs'));
+    });
+
+    it('puts the imports after the front matter, not before it', () => {
+        const out = addComponentImports('---\ntitle: A\n---\n\n<Steps>x</Steps>\n');
+        assert.ok(out.startsWith('---\ntitle: A\n---\n'));
+        assert.ok(out.indexOf('import') > out.indexOf('title: A'));
+    });
+
+    it('imports the components of the site by their default export', () => {
+        const out = addComponentImports('<MIcon name="home-rounded" /> <Screenshot src="a.png" alt="" />');
+        assert.ok(out.includes("import MIcon from '/src/components/MIcon.astro';"));
+        assert.ok(out.includes("import Screenshot from '/src/components/Screenshot.astro';"));
+    });
+
+    it('leaves a page that uses none as it is, and ignores a component named inside code', () => {
+        const plain = '---\ntitle: A\n---\nText\n```mdx\n<Steps>\n```\n';
+        assert.equal(addComponentImports(plain), plain);
+    });
+});
+
 describe('transformBody', () => {
-    it('does both', () => {
-        assert.equal(transformBody('> [!WARNING]\n> See [roles](page:getting-started/give-permission).', '/es/plugins/x/m405'), ':::caution\nSee [roles](/es/plugins/x/m405/getting-started/give-permission/).\n:::');
+    it('does the alerts and the page links', () => {
+        assert.equal(
+            transformBody('> [!WARNING]\n> See [roles](page:getting-started/give-permission).', '/es/plugins/x/m405'),
+            ':::caution\nSee [roles](/es/plugins/x/m405/getting-started/give-permission/).\n:::',
+        );
+    });
+
+    it('resolves the assets when it is given where they are', () => {
+        assert.equal(transformBody('![A](asset:a.png)', '/en/p/m1', '/docs-assets/p/m1'), '![A](/docs-assets/p/m1/a.png)');
     });
 });

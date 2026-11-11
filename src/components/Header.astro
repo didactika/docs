@@ -1,0 +1,11 @@
+---
+// Replaces the header of Starlight with the one of Didactika (see SiteHeader.astro).
+import {pageIdOf} from '../lib/site';
+import SiteHeader from './SiteHeader.astro';
+
+const route = Astro.locals.starlightRoute;
+const data = route.entry.data as {product?: string; line?: string};
+const pageId = data.product && data.line ? pageIdOf(route.id, data.product, data.line) : undefined;
+---
+
+<SiteHeader lang={route.lang} path={Astro.url.pathname} productSlug={data.product} line={data.line} pageId={pageId} />

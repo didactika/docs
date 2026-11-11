@@ -1,11 +1,13 @@
-# The site, served for development: the portal of Didactika Docs with the documentation of the products that are in manifest.json.
+# The site, served as it will be deployed: the portal of Didactika Docs with the documentation of the products that are in manifest.json.
 #
-#   docker compose up            then open http://localhost:4321/
-#   docker compose logs -f site  to see what the synchronisation reports
+#   docker compose up -d         then open http://localhost:4321/
+#   docker compose logs -f site  to see the builds and what the synchronisation reports
+#   docker compose down          to stop it
 #
 # The products are read from clones on this machine (DOCS_SOURCES_DIR, by default the folder above this repository), not from GitHub, so
 # what you have committed locally shows up before it is pushed. To preview branches that are not merged, list them in preview.refs.json
-# (copy preview.refs.example.json). The documentation is read again every few seconds and the site reloads by itself.
+# (copy preview.refs.example.json). The documentation is read again every few seconds and the site is built again when it changes, so what
+# you see, search included, is what Pages publishes. `npm run dev` gives the development server instead, with hot reload and no search.
 name: didactika-docs
 
 services:
@@ -17,8 +19,8 @@ services:
     environment:
       DOCS_SOURCES: /sources
       DOCS_NO_FETCH: '1'
-      DOCS_POLL: '1'
       ASTRO_TELEMETRY_DISABLED: '1'
+      PORT: '4321'
       # The clones belong to another user than the one in the container, and git refuses them unless it is told they are fine.
       GIT_CONFIG_COUNT: '1'
       GIT_CONFIG_KEY_0: safe.directory
@@ -28,14 +30,7 @@ services:
       # The dependencies are installed for Linux inside the container; the ones of this machine are not used.
       - node_modules:/app/node_modules
       - ${DOCS_SOURCES_DIR:-..}:/sources:ro
-    command:
-      - sh
-      - -c
-      - |
-        npm ci --no-audit --no-fund
-        node tools/sync.ts || true
-        (while true; do sleep 5; node tools/sync.ts > /tmp/sync.log 2>&1 || true; done) &
-        exec npx astro dev --host 0.0.0.0 --port 4321
+    command: sh -c "npm ci --no-audit --no-fund && node tools/serve.ts"
 
 volumes:
   node_modules:

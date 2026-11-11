@@ -4,7 +4,7 @@ import {mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {dirname, join} from 'node:path';
 import {after, before, describe, it} from 'node:test';
-import {lineLabel, moodleVersion, readProduct, readVersionPhp} from './source.ts';
+import {lineLabel, moodleVersion, readComponent, readProduct, readVersionPhp} from './source.ts';
 
 const versionPhp = (release: string, low: number, high: number): string =>
     `<?php\n$plugin->version = 2026110700;\n$plugin->release   = '${release}';\n$plugin->supported = [${low}, ${high}];\n`;
@@ -17,6 +17,11 @@ describe('version.php', () => {
     it('is not a line without the -m suffix or the range', () => {
         assert.equal(readVersionPhp(versionPhp('1.1.1', 405, 502)), undefined);
         assert.equal(readVersionPhp("<?php\n$plugin->release = '1.0.0-m405';\n"), undefined);
+    });
+
+    it('reads the component of the plugin', () => {
+        assert.equal(readComponent("<?php\n$plugin->component = 'local_demo';\n"), 'local_demo');
+        assert.equal(readComponent('<?php\n'), null);
     });
 
     it('writes the label of a line', () => {

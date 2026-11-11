@@ -1,0 +1,45 @@
+---
+/**
+ * The navigation of a page of a product shows only that product, in the version the reader is in: its overview and its sections. The
+ * previous and next pages follow the same list, so a reader never ends up in another version by turning the page.
+ */
+import Default from '@astrojs/starlight/components/Sidebar.astro';
+import {productUrl, site} from '../lib/site';
+
+const route = Astro.locals.starlightRoute;
+const data = route.entry.data as {product?: string; line?: string};
+const product = site().products.find((candidate) => candidate.slug === data.product);
+
+type Entry = (typeof route.sidebar)[number];
+
+/** The entries of the group that holds the overview of the version: that group is the navigation of the version. */
+function groupOf(entries: Entry[], overview: string): Entry[] | undefined {
+    for (const entry of entries) {
+        if (entry.type !== 'group') {
+            continue;
+        }
+        if (entry.entries.some((child) => child.type === 'link' && child.href === overview)) {
+            return entry.entries;
+        }
+        const inner = groupOf(entry.entries, overview);
+        if (inner) {
+            return inner;
+        }
+    }
+    return undefined;
+}
+
+const links = (entries: Entry[]): Array<Extract<Entry, {type: 'link'}>> => entries.flatMap((entry) => (entry.type === 'link' ? [entry] : links(entry.entries)));
+
+if (product && data.line) {
+    const own = groupOf(route.sidebar, productUrl(route.lang, product, data.line));
+    if (own) {
+        route.sidebar = own;
+        const all = links(own);
+        const here = all.findIndex((link) => link.isCurrent);
+        route.pagination = {prev: here > 0 ? all[here - 1] : undefined, next: here >= 0 ? all[here + 1] : undefined};
+    }
+}
+---
+
+<Default {...Astro.props}><slot /></Default>
