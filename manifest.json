@@ -1,5 +1,12 @@
 {
   "products": [
-    {"repo": "didactika/moodle-local_delegateaccount", "kind": "plugin"}
+    {
+      "repo": "didactika/moodle-local_delegateaccount",
+      "kind": "plugin"
+    },
+    {
+      "repo": "didactika/moodle-local_servicemanager",
+      "kind": "plugin"
+    }
   ]
 }
