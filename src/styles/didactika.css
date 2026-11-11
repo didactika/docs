@@ -584,3 +584,7 @@ a.d-feature:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--li
 /* The header already has the colour and the language, so the menu of a small screen does not repeat them. */
 .mobile-preferences { display: none; }
 .d-pill { text-decoration: none; color: var(--ink); }
+
+/* The web and GitHub are icons: in the header on a wide screen, and in the foot where the header has no room for them. */
+.d-foot-icons { display: none; gap: 0.4rem; }
+@media (max-width: 62rem) { .d-foot-icons { display: inline-flex; } }
