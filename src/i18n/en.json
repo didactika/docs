@@ -12,7 +12,6 @@
   "section.concepts": "Concepts",
   "section.guides": "Guides",
   "section.reference": "Reference",
-
   "brandBy": "by Didactika",
   "home": "Home",
   "search": "Find a page",
@@ -32,7 +31,6 @@
   "menu": "Menu",
   "github": "GitHub",
   "designSystem": "Design system",
-
   "heroEyebrow": "Open source · GPL-3.0",
   "heroTitleA": "Documentation for every",
   "heroTitleB": "Didactika plugin",
@@ -68,15 +66,12 @@
   "languagesText": "English and Spanish are complete for every page. More languages can be added without touching the site.",
   "browseAll": "Browse all {kind}",
   "noProducts": "There are no products here yet.",
-
   "inheritedFrom": "Inherited from {line}",
   "addedIn": "New in {line}",
   "changedIn": "Changed in {line}",
   "inThisVersion": "In this version",
   "onThisPage": "On this page",
   "editPage": "Edit this page",
-  "previous": "Previous",
-  "next": "Next",
   "notInVersion": "This page does not exist in {line}. You were taken to its overview.",
   "footerLicence": "Documentation under GPL-3.0-or-later, as Moodle.",
   "footerSource": "Source of this site",
@@ -87,5 +82,18 @@
   "release": "Release",
   "requires": "Moodle",
   "directoryOpen": "View in the Moodle directory",
-  "repository": "Repository"
+  "repository": "Repository",
+  "footAbout": "The documentation of the Moodle plugins and npm packages of Didactika, by version and in your language.",
+  "cofounders": "Co-founders",
+  "cofounder": "Co-founder",
+  "collaborators": "Collaborators",
+  "allCollaborators": "All collaborators on GitHub",
+  "join": "See everything we build and contribute",
+  "support": "Support Didactika",
+  "supportLink": "Support Didactika",
+  "credits": "Built with Starlight · Icons by Material Symbols · Technical documentation with rup-flow Pro",
+  "languageFilter": "Find a language",
+  "languageNone": "No language matches.",
+  "pathHint": "Read them in this order; each one builds on the one before.",
+  "section.technical": "Technical documentation"
 }

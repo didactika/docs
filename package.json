@@ -10,8 +10,8 @@
   },
   "scripts": {
     "sync": "node tools/sync.ts",
-    "dev": "node tools/sync.ts && astro dev",
-    "build": "node tools/sync.ts && astro build",
+    "dev": "node tools/sync.ts && node tools/project.ts && astro dev",
+    "build": "node tools/sync.ts && node tools/project.ts && astro build",
     "preview": "astro preview",
     "serve": "node tools/serve.ts",
     "brand": "node tools/build-brand.ts",

@@ -4,7 +4,7 @@
  * without the navigation of a product.
  */
 import '../styles/didactika.css';
-import SiteFooter from '../components/SiteFooter.astro';
+import ProjectFoot from '../components/ProjectFoot.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import {site, t} from '../lib/site';
 
@@ -49,7 +49,7 @@ const language = site().languages.find((candidate) => candidate.code === lang);
             <a class="d-skip" href="#main">{t(lang, 'home')}</a>
             <header class="d-top"><SiteHeader lang={lang} path={Astro.url.pathname} /></header>
             <main id="main" class="d-main"><slot /></main>
-            <SiteFooter lang={lang} />
+            <ProjectFoot lang={lang} />
         </div>
     </body>
 </html>

@@ -66,6 +66,7 @@ const COMPONENTS: Array<{names: string[]; from: string; named: boolean}> = [
     {names: ['Screenshot'], from: '/src/components/Screenshot.astro', named: false},
     {names: ['FeatureGrid'], from: '/src/components/FeatureGrid.astro', named: false},
     {names: ['Feature'], from: '/src/components/Feature.astro', named: false},
+    {names: ['Path'], from: '/src/components/Path.astro', named: false},
 ];
 
 /** Adds, before the content of an MDX page, the imports of the components it uses. */

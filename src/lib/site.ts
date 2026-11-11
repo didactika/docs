@@ -71,6 +71,36 @@ export function site(): SiteData {
     return cached;
 }
 
+export interface PersonData {
+    login: string;
+    name: string | null;
+    url: string;
+    avatar: string;
+    contributions: number;
+}
+
+/** What the footer says about Didactika: its people and how to support it (tools/project.ts). */
+export interface ProjectData {
+    organisation: {login: string; name: string; website: string | null; avatar: string | null; url: string; repositoriesUrl: string; peopleUrl: string};
+    founders: PersonData[];
+    contributors: PersonData[];
+    funding: {platform: string; url: string} | null;
+}
+
+const projectFile = join(process.cwd(), 'src', 'data', 'project.generated.json');
+const emptyProject: ProjectData = {
+    organisation: {login: 'didactika', name: 'Didactika', website: 'https://didactika.org', avatar: null, url: 'https://github.com/didactika', repositoriesUrl: 'https://github.com/orgs/didactika/repositories', peopleUrl: 'https://github.com/orgs/didactika/people'},
+    founders: [],
+    contributors: [],
+    funding: {platform: 'Ko-fi', url: 'https://ko-fi.com/didactika'},
+};
+let project_: ProjectData | undefined;
+
+export function project(): ProjectData {
+    project_ ??= existsSync(projectFile) ? (JSON.parse(readFileSync(projectFile, 'utf8')) as ProjectData) : emptyProject;
+    return project_;
+}
+
 const dictionaries = import.meta.glob<Record<string, string>>('../i18n/*.json', {eager: true, import: 'default'});
 
 const dictionary = (code: string): Record<string, string> => dictionaries[`../i18n/${code}.json`] ?? {};

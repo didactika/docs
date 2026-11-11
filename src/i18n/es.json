@@ -12,7 +12,6 @@
   "section.concepts": "Conceptos",
   "section.guides": "Guías",
   "section.reference": "Referencia",
-
   "brandBy": "de Didactika",
   "home": "Inicio",
   "search": "Buscar una página",
@@ -32,7 +31,6 @@
   "menu": "Menú",
   "github": "GitHub",
   "designSystem": "Sistema de diseño",
-
   "heroEyebrow": "Código abierto · GPL-3.0",
   "heroTitleA": "La documentación de cada",
   "heroTitleB": "plugin de Didactika",
@@ -68,15 +66,12 @@
   "languagesText": "El inglés y el español están completos en todas las páginas. Se pueden añadir más idiomas sin tocar el sitio.",
   "browseAll": "Ver todos los {kind}",
   "noProducts": "Todavía no hay productos aquí.",
-
   "inheritedFrom": "Heredada de {line}",
   "addedIn": "Nueva en {line}",
   "changedIn": "Modificada en {line}",
   "inThisVersion": "En esta versión",
   "onThisPage": "En esta página",
   "editPage": "Editar esta página",
-  "previous": "Anterior",
-  "next": "Siguiente",
   "notInVersion": "Esta página no existe en {line}. Te hemos llevado a su visión general.",
   "footerLicence": "Documentación bajo GPL-3.0-or-later, como Moodle.",
   "footerSource": "Código de este sitio",
@@ -87,5 +82,18 @@
   "release": "Versión publicada",
   "requires": "Moodle",
   "directoryOpen": "Ver en el directorio de Moodle",
-  "repository": "Repositorio"
+  "repository": "Repositorio",
+  "footAbout": "La documentación de los plugins de Moodle y los paquetes npm de Didactika, por versión y en tu idioma.",
+  "cofounders": "Cofundadores",
+  "cofounder": "Cofundador",
+  "collaborators": "Colaboradores",
+  "allCollaborators": "Todos los colaboradores en GitHub",
+  "join": "Ver todo lo que construimos y aportamos",
+  "support": "Apoya a Didactika",
+  "supportLink": "Apoya a Didactika",
+  "credits": "Hecho con Starlight · Iconos de Material Symbols · Documentación técnica con rup-flow Pro",
+  "languageFilter": "Buscar un idioma",
+  "languageNone": "Ningún idioma coincide.",
+  "pathHint": "Léelas en este orden; cada una se apoya en la anterior.",
+  "section.technical": "Documentación técnica"
 }

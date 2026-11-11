@@ -1,0 +1,75 @@
+---
+/**
+ * The language of the reader. It is a menu with a filter and not a row of buttons, because the languages are data (languages.json) and the
+ * list will grow: it scrolls, it can be filtered by name or by code, and it says how complete each language is.
+ */
+import MIcon from './MIcon.astro';
+import {site, t} from '../lib/site';
+
+interface Props {
+    lang: string;
+    /** The address of the page, to offer the same page in another language. */
+    path: string;
+    /** How complete each language is for the product the reader is in, as a share from 0 to 100. */
+    coverage?: Record<string, number>;
+}
+
+const {lang, path, coverage = {}} = Astro.props;
+const languages = site().languages;
+const current = languages.find((language) => language.code === lang);
+const inLanguage = (code: string): string => path.replace(/^\/[^/]+/, `/${code}`);
+const filterable = languages.length > 6;
+---
+
+<details class="d-dd d-lang" data-lang-menu>
+    <summary aria-label={t(lang, 'language')} title={t(lang, 'language')}>
+        <MIcon name="translate-rounded" />
+        <span class="d-code">{lang.toUpperCase()}</span>
+        <MIcon name="expand-more-rounded" />
+    </summary>
+    <div class="d-dd-menu d-lang-menu">
+        <p class="d-menu-title">{t(lang, 'language')} <small>{current?.name}</small></p>
+        {
+            filterable && (
+                <label class="d-lang-filter">
+                    <MIcon name="search-rounded" />
+                    <input type="search" data-lang-filter placeholder={t(lang, 'languageFilter')} aria-label={t(lang, 'languageFilter')} autocomplete="off" spellcheck="false" />
+                </label>
+            )
+        }
+        <ul class="d-lang-list" role="list">
+            {
+                languages.map((language) => (
+                    <li data-lang-item data-search={`${language.name} ${language.code}`.toLowerCase()}>
+                        <a href={inLanguage(language.code)} hreflang={language.code} lang={language.code} aria-current={language.code === lang ? 'true' : undefined}>
+                            <span class="d-lang-code">{language.code}</span>
+                            <span class="d-lang-name">{language.name}</span>
+                            {coverage[language.code] !== undefined && coverage[language.code] < 100 && <small>{coverage[language.code]}%</small>}
+                            {language.code === lang && <MIcon name="check-rounded" />}
+                        </a>
+                    </li>
+                ))
+            }
+        </ul>
+        <p class="d-lang-empty" hidden>{t(lang, 'languageNone')}</p>
+    </div>
+</details>
+
+<script is:inline>
+    document.querySelectorAll('[data-lang-menu]').forEach(function (menu) {
+        var filter = menu.querySelector('[data-lang-filter]');
+        var items = menu.querySelectorAll('[data-lang-item]');
+        var empty = menu.querySelector('.d-lang-empty');
+        menu.addEventListener('toggle', function () { if (menu.open && filter) { filter.focus(); } });
+        if (filter) {
+            filter.addEventListener('input', function () {
+                var q = filter.value.trim().toLowerCase();
+                var shown = 0;
+                items.forEach(function (item) { var match = !q || item.dataset.search.indexOf(q) !== -1; item.hidden = !match; if (match) { shown++; } });
+                empty.hidden = shown > 0;
+            });
+        }
+        document.addEventListener('click', function (event) { if (menu.open && !menu.contains(event.target)) { menu.open = false; } });
+        document.addEventListener('keydown', function (event) { if (event.key === 'Escape' && menu.open) { menu.open = false; } });
+    });
+</script>

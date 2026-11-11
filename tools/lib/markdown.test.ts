@@ -82,9 +82,10 @@ describe('addComponentImports', () => {
     });
 
     it('imports the components of the site by their default export', () => {
-        const out = addComponentImports('<MIcon name="home-rounded" /> <Screenshot src="a.png" alt="" />');
+        const out = addComponentImports('<MIcon name="home-rounded" /> <Screenshot src="a.png" alt="" /> <Path title="x" pages={[]} />');
         assert.ok(out.includes("import MIcon from '/src/components/MIcon.astro';"));
         assert.ok(out.includes("import Screenshot from '/src/components/Screenshot.astro';"));
+        assert.ok(out.includes("import Path from '/src/components/Path.astro';"));
     });
 
     it('leaves a page that uses none as it is, and ignores a component named inside code', () => {

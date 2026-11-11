@@ -2,7 +2,7 @@
 /** The home of the portal: what it is, what is documented and how every documentation is organised. */
 import MIcon from '../../components/MIcon.astro';
 import ProductCard from '../../components/ProductCard.astro';
-import DirectoryChip from '../../components/DirectoryChip.astro';
+import Logo from '../../components/Logo.astro';
 import Landing from '../../layouts/Landing.astro';
 import {latestLine, localised, productUrl, site, t} from '../../lib/site';
 
@@ -41,17 +41,16 @@ const organised = [
                 </div>
             </div>
             <div class="d-hero-card" aria-hidden="true">
-                <span class="d-mono">Didactika Docs / {featured ? localised(featured.title, lang) : 'Didactika'}</span>
-                <div class="d-hero-tile"><img src={featured?.icon ?? '/brand/didactika-logo.png'} alt="" /></div>
-                {
-                    featured && (
-                        <div class="d-hero-chips">
-                            {[...featured.lines].reverse().map((line) => <span class:list={['d-chip', {accent: line.latest}]}>{line.label}</span>)}
-                            {data.languages.map((language) => <span class="d-chip"><MIcon name="translate-rounded" />{language.code.toUpperCase()}</span>)}
-                            <DirectoryChip lang={lang} directory={featured.directory} />
-                        </div>
-                    )
-                }
+                <span class="d-mono">Didactika Docs / {t(lang, 'plugins')} · {t(lang, 'packages')}</span>
+                <div class="d-hero-mark"><Logo size="xl" /></div>
+                <div class="d-hero-products">
+                    {data.products.map((product) => <span class:list={['d-tile', {soft: !product.icon}]} title={localised(product.title, lang)}>{product.icon ? <img src={product.icon} alt="" /> : <MIcon name="extension-rounded" />}</span>)}
+                    {data.coming.slice(0, 4).map(() => <span class="d-tile ghost"><MIcon name="more-horiz-rounded" /></span>)}
+                </div>
+                <div class="d-hero-chips">
+                    <span class="d-chip accent"><MIcon name="layers-rounded" />{stats.versions} {t(lang, 'statVersions')}</span>
+                    {data.languages.map((language) => <span class="d-chip"><MIcon name="translate-rounded" />{language.code.toUpperCase()}</span>)}
+                </div>
             </div>
         </div>
     </section>

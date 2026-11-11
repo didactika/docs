@@ -1,0 +1,17 @@
+---
+/**
+ * The frame of a page of the documentation: Starlight's own, with the foot of the site added after the content, so it takes the whole width
+ * of the page and not the column of the text (see ProjectFoot.astro).
+ */
+import Default from '@astrojs/starlight/components/PageFrame.astro';
+import ProjectFoot from './ProjectFoot.astro';
+
+const lang = Astro.locals.starlightRoute.lang;
+---
+
+<Default {...Astro.props}>
+    <slot name="header" slot="header" />
+    <slot name="sidebar" slot="sidebar" />
+    <slot />
+    <ProjectFoot lang={lang} />
+</Default>

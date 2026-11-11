@@ -83,6 +83,7 @@ export default defineConfig({
                 PageTitle: './src/components/PageTitle.astro',
                 Sidebar: './src/components/Sidebar.astro',
                 Footer: './src/components/Footer.astro',
+                PageFrame: './src/components/PageFrame.astro',
             },
             favicon: '/brand/favicon.ico',
             head: [
@@ -98,6 +99,7 @@ export default defineConfig({
             ],
             social: [{icon: 'github', label: 'GitHub', href: 'https://github.com/didactika'}],
             customCss: ['./src/styles/didactika.css'],
+            pagination: false,
             sidebar,
         }),
     ],

@@ -3,9 +3,11 @@
  * The header of the site, the same on the home, on the catalog and on every page of the documentation: the mark of Didactika, the product
  * and version the reader is in, the search, the language, the colour theme and the repository of the organisation.
  */
+import LanguageMenu from './LanguageMenu.astro';
+import Logo from './Logo.astro';
 import MIcon from './MIcon.astro';
 import SiteSearch from './SiteSearch.astro';
-import {localised, productUrl, site, t} from '../lib/site';
+import {localised, productUrl, project, site, t} from '../lib/site';
 
 interface Props {
     lang: string;
@@ -23,8 +25,7 @@ const data = site();
 const product = data.products.find((candidate) => candidate.slug === productSlug);
 const current = product?.lines.find((candidate) => candidate.id === line);
 
-/** The same page in another language: the first segment of the address is the language. */
-const inLanguage = (code: string): string => path.replace(/^\/[^/]+/, `/${code}`);
+const funding = project().funding;
 
 /** The same page in another version when it exists there, and the overview of that version when it does not. */
 const inVersion = (id: string): string => {
@@ -38,7 +39,7 @@ const logo = '/brand/didactika-logo.png';
 
 <div class="d-head">
     <a class="d-brand" href={`/${lang}/`} aria-label="Didactika Docs">
-        <img src="/brand/favicon.svg" alt="" width="36" height="36" />
+        <Logo />
         <span class="d-wordmark"><b>Didactika Docs</b><small>{t(lang, 'brandBy')}</small></span>
     </a>
 
@@ -74,13 +75,15 @@ const logo = '/brand/didactika-logo.png';
 
     <div class="d-head-tools">
         <SiteSearch lang={lang} line={current && !current.latest ? current.id : undefined} />
-        <nav class="d-seg d-hide-md" aria-label={t(lang, 'language')}>
-            {data.languages.map((language) => (
-                <a href={inLanguage(language.code)} hreflang={language.code} lang={language.code} aria-current={language.code === lang ? 'true' : undefined} title={language.name}>
-                    {language.code}
+        <LanguageMenu lang={lang} path={path} coverage={current?.coverage} />
+        <span class="d-sep d-hide-md" aria-hidden="true"></span>
+        {
+            funding && (
+                <a class="d-iconbtn d-heart" href={funding.url} rel="noopener" aria-label={t(lang, 'support')} title={t(lang, 'support')}>
+                    <MIcon name="favorite-rounded" />
                 </a>
-            ))}
-        </nav>
+            )
+        }
         <button type="button" class="d-iconbtn d-theme" data-theme-toggle aria-label={t(lang, 'theme')} title={t(lang, 'theme')}>
             <span class="d-seg-light"><MIcon name="light-mode-rounded" /></span>
             <span class="d-seg-dark"><MIcon name="dark-mode-rounded" /></span>
