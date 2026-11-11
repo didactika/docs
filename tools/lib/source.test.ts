@@ -80,6 +80,20 @@ describe('a repository with two lines', () => {
         assert.ok(!base.files.has('en/guides/new.md'));
     });
 
+    it('reads a line from another ref, to preview what is not merged yet', () => {
+        git('checkout', '-q', '-b', 'preview', 'main');
+        write('docs/en/index.md', '---\ntitle: Preview\n---\n');
+        git('add', '-A');
+        git('commit', '-q', '-m', 'preview');
+        git('checkout', '-q', 'main');
+        const preview = readProduct(repo, {refs: {main: 'preview'}});
+        assert.equal(preview.lines[1].branch, 'main');
+        assert.ok(preview.lines[1].files.get('en/index.md')!.includes('Preview'));
+        assert.ok(!readProduct(repo).lines[1].files.get('en/index.md')!.includes('Preview'));
+        assert.throws(() => readProduct(repo, {refs: {main: 'does-not-exist'}}), /is not a ref/);
+        assert.throws(() => readProduct(repo, {refs: {feature: 'preview'}}), /is not a branch that is a line/);
+    });
+
     it('keeps a binary asset byte for byte', () => {
         const asset = readProduct(repo).lines[0].files.get('_assets/shot.png')!;
         assert.equal(Buffer.from(asset, 'latin1').toString('hex'), '89504e470d0a1a0a00ff');

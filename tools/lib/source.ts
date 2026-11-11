@@ -74,8 +74,13 @@ export function readVersionPhp(php: string): {id: string; release: string; low: 
     return {id: `m${id}`, release, low: Number(supported[1]), high: Number(supported[2])};
 }
 
+export interface ReadOptions {
+    /** Reads a line from another ref than its own branch, to see what is not merged yet: `{main: 'docs/portal-503'}`. */
+    refs?: Record<string, string>;
+}
+
 /** Local branches and the ones of `origin`, by branch name; `origin` wins because it is what is published. */
-function branches(repo: string): Map<string, string> {
+function branches(repo: string, overrides: Record<string, string> = {}): Map<string, string> {
     const refs = git(repo, ['for-each-ref', '--format=%(refname)', 'refs/heads', 'refs/remotes/origin']).split('\n').filter(Boolean);
     const found = new Map<string, string>();
     for (const ref of refs) {
@@ -85,6 +90,15 @@ function branches(repo: string): Map<string, string> {
         if (name && LINE_BRANCH.test(name) && (remote || !found.has(name))) {
             found.set(name, ref);
         }
+    }
+    for (const [name, ref] of Object.entries(overrides)) {
+        if (!LINE_BRANCH.test(name)) {
+            throw new Error(`${name} is not a branch that is a line (main or MOODLE_<version>_STABLE).`);
+        }
+        if (tryGit(repo, ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`]) === undefined) {
+            throw new Error(`${ref}, given for ${name}, is not a ref of ${repo}.`);
+        }
+        found.set(name, ref);
     }
     return found;
 }
@@ -106,9 +120,9 @@ function filesOf(repo: string, ref: string): Map<string, string> {
 }
 
 /** Reads the product documented by the repository in `repo`. */
-export function readProduct(repo: string): SourceProduct {
+export function readProduct(repo: string, options: ReadOptions = {}): SourceProduct {
     const issues: Issue[] = [];
-    const found = branches(repo);
+    const found = branches(repo, options.refs);
     const defaultRef = found.get(DEFAULT_BRANCH);
     const docsRaw = defaultRef ? tryGit(repo, ['show', `${defaultRef}:docs/docs.json`]) : undefined;
     const docs = docsRaw ? (JSON.parse(docsRaw) as DocsJson) : null;

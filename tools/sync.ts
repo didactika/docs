@@ -14,14 +14,18 @@
  *   DOCS_SOURCES   folder that holds a clone of each repository, named like it. Default: .cache/sources, cloned from GitHub.
  *   DOCS_NO_FETCH  use the clones as they are, without fetching.
  *   DOCS_MANIFEST  another manifest than manifest.json, for trying the site with a repository of examples.
+ *   DOCS_REFS      JSON that reads a line from another ref than its branch, to preview what is not merged yet:
+ *                  {"didactika/moodle-local_x": {"main": "docs/portal", "MOODLE_405_STABLE": "docs/portal-405"}}
+ *                  The same JSON in preview.refs.json (ignored by git) is read when the variable is not set.
  *
  * @license GPL-3.0-or-later
  */
 
 import {execFileSync} from 'node:child_process';
-import {existsSync, mkdirSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
+import {existsSync, mkdirSync, readdirSync, readFileSync, rmdirSync, rmSync, writeFileSync} from 'node:fs';
 import {dirname, join, resolve} from 'node:path';
 import {stringify} from 'yaml';
+import {transformBody} from './lib/markdown.ts';
 import {parseFrontmatter, resolveProduct, type Issue, type LanguageDef} from './lib/resolve.ts';
 import {readProduct, type DocsJson} from './lib/source.ts';
 
@@ -70,10 +74,40 @@ function sourceOf(repo: string): string {
     return folder;
 }
 
+// Everything written in this run. A file that is already as it should be is not touched, so a watching dev server does not rebuild for nothing,
+// and the files of an earlier run that were not written again are deleted at the end.
+const written = new Set<string>();
+
 function write(path: string, text: string): void {
+    written.add(path);
+    if (existsSync(path) && readFileSync(path, 'utf8') === text) {
+        return;
+    }
     mkdirSync(dirname(path), {recursive: true});
     writeFileSync(path, text);
 }
+
+/** Deletes what an earlier run generated and this one did not, and the folders that are left empty. */
+function removeStale(folder: string): void {
+    if (!existsSync(folder)) {
+        return;
+    }
+    for (const name of readdirSync(folder, {withFileTypes: true})) {
+        const path = join(folder, name.name);
+        if (name.isDirectory()) {
+            removeStale(path);
+        } else if (!written.has(path)) {
+            rmSync(path);
+        }
+    }
+    if (readdirSync(folder).length === 0) {
+        rmdirSync(folder);
+    }
+}
+
+// Refs to preview instead of the branches of a line: from DOCS_REFS, or from preview.refs.json (see preview.refs.example.json).
+const previewFile = join(root, 'preview.refs.json');
+const previews = (process.env.DOCS_REFS ? JSON.parse(process.env.DOCS_REFS) : existsSync(previewFile) ? JSON.parse(readFileSync(previewFile, 'utf8')) : {}) as Record<string, Record<string, string>>;
 
 /** The front matter Starlight understands, made from the one authors write (title, summary, order). */
 function frontmatter(data: Record<string, unknown>, extra: Record<string, unknown>): string {
@@ -93,17 +127,19 @@ function frontmatter(data: Record<string, unknown>, extra: Record<string, unknow
     return `---\n${stringify(out)}---\n`;
 }
 
-for (const dir of Object.values(KIND_DIR)) {
-    for (const language of languages) {
-        rmSync(join(content, language.code, dir), {recursive: true, force: true});
-    }
-}
+/** The folders the pages of a version are in, in the order the navigation shows them: the usual ones first, then the rest. */
+const USUAL_SECTIONS = ['getting-started', 'guides', 'reference'];
+const sectionsOf = (ids: string[]): string[] =>
+    [...new Set(ids.filter((id) => id.includes('/')).map((id) => id.split('/')[0]))].sort((a, b) => {
+        const rank = (name: string): number => (USUAL_SECTIONS.includes(name) ? USUAL_SECTIONS.indexOf(name) : USUAL_SECTIONS.length);
+        return rank(a) - rank(b) || a.localeCompare(b);
+    });
 
 const issues: Array<Issue & {product: string}> = [];
 const products: Array<Record<string, unknown>> = [];
 
 for (const entry of manifest.products) {
-    const product = readProduct(sourceOf(entry.repo));
+    const product = readProduct(sourceOf(entry.repo), {refs: previews[entry.repo]});
     const label = entry.repo;
     issues.push(...product.issues.map((issue) => ({...issue, product: label})));
 
@@ -141,11 +177,13 @@ for (const entry of manifest.products) {
                     provenance: page.provenance,
                     provenanceFrom: page.provenanceFrom,
                     shownLang: page.shown.lang,
-                }) + body;
+                });
             const base = join(content, page.lang, kindDir, docs.slug);
-            write(join(base, line.id, `${page.id}${page.shown.ext}`), text);
+            const address = `/${page.lang}/${kindDir}/${docs.slug}`;
+            write(join(base, line.id, `${page.id}${page.shown.ext}`), text + transformBody(body, `${address}/${line.id}`));
+            // The address without a version shows the newest one, and its links stay in that address.
             if (line.id === newest.id) {
-                write(join(base, `${page.id}${page.shown.ext}`), text);
+                write(join(base, `${page.id}${page.shown.ext}`), text + transformBody(body, address));
             }
         }
     }
@@ -160,7 +198,7 @@ for (const entry of manifest.products) {
         translations: docs.translations ?? {source: 'l10n'},
         lines: resolution.lines.map((line) => {
             const info = product.lines.find((candidate) => candidate.id === line.id)!;
-            return {id: line.id, label: info.label, branch: info.branch, release: info.release, extends: info.extends, latest: line.id === newest.id, coverage: line.coverage, pages: line.pages.filter((page) => page.lang === sourceCode).length};
+            return {id: line.id, label: info.label, branch: info.branch, release: info.release, extends: info.extends, latest: line.id === newest.id, coverage: line.coverage, pages: line.pages.filter((page) => page.lang === sourceCode).length, sections: sectionsOf(line.pages.filter((page) => page.lang === sourceCode).map((page) => page.id))};
         }),
     });
 }
@@ -181,6 +219,12 @@ for (const language of languages) {
             join(content, language.code, dir, 'index.md'),
             `---\ntitle: ${ui(language.code, dir)}\ndescription: ${ui(language.code, `${dir}Description`)}\n---\n\n| ${ui(language.code, 'name')} | ${ui(language.code, 'summary')} |\n| --- | --- |\n${rows.join('\n')}\n`,
         );
+    }
+}
+
+for (const language of languages) {
+    for (const dir of Object.values(KIND_DIR)) {
+        removeStale(join(content, language.code, dir));
     }
 }
 

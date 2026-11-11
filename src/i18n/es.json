@@ -6,5 +6,9 @@
   "name": "Nombre",
   "summary": "Resumen",
   "translationMissing": "Esta página aún no está disponible en {language}. Estás leyendo la versión en inglés.",
-  "translationOutdated": "La versión en {language} de esta página es anterior a la inglesa, así que se muestra la versión en inglés."
+  "translationOutdated": "La versión en {language} de esta página es anterior a la inglesa, así que se muestra la versión en inglés.",
+  "overview": "Visión general",
+  "section.getting-started": "Primeros pasos",
+  "section.guides": "Guías",
+  "section.reference": "Referencia"
 }
