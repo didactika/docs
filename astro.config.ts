@@ -94,7 +94,7 @@ export default defineConfig({
     integrations: [
         starlight({
             title: {en: 'Didactika Docs', es: 'Documentación de Didactika'},
-            description: 'The documentation of the Moodle plugins and the npm packages of Didactika.',
+            description: 'Official documentation for the plugins and libraries of Didactika.',
             defaultLocale: 'en',
             locales,
             // The header, the title of a page, the navigation and the foot are drawn by the components of Didactika (src/components).
