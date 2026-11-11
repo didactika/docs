@@ -26,7 +26,7 @@ const organised = [
     {icon: 'lightbulb-rounded', title: 'orgConceptsTitle', text: 'orgConceptsText'},
     {icon: 'task-alt-rounded', title: 'orgGuidesTitle', text: 'orgGuidesText'},
     {icon: 'menu-book-rounded', title: 'orgReferenceTitle', text: 'orgReferenceText'},
-    {icon: 'schema-rounded', title: 'orgTechTitle', text: 'orgTechText', href: 'https://www.agensi.io/skills/rup-flow-pro-complete-rup-workflow-both-ways', link: 'orgTechLink'},
+    {icon: 'schema-rounded', title: 'orgTechTitle', text: 'orgTechText'},
 ];
 ---
 
@@ -101,7 +101,6 @@ const organised = [
                             <span class="d-tile soft"><MIcon name={card.icon} /></span>
                             <h3>{t(lang, card.title)}</h3>
                             <p>{t(lang, card.text)}</p>
-                            {card.href && <a class="d-cardlink" href={card.href} rel="noopener">{t(lang, card.link!)} <MIcon name="arrow-outward-rounded" /></a>}
                         </div>
                     ))
                 }

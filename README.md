@@ -86,7 +86,7 @@ GPL-3.0-or-later, as Moodle.
 
 ## Technical documentation
 
-The technical documentation of a product (domain model, requirements, use cases, analysis, design, code map) lives in `docs/<language>/technical/` of its repository and is written with the **rup-flow Pro** skill ([where to get it](https://www.agensi.io/skills/rup-flow-pro-complete-rup-workflow-both-ways)). The portal shows it as the "Technical documentation" section of the product: the `README.md` of a folder is its index, the diagrams (`.svg`) and tables (`.csv`) next to a page are published with it, and links between files keep working. The colours of the diagrams are `rup/didactika.theme.json`; copy it into the `theme` key of the `rup.config.json` of the product.
+The technical documentation of a product (domain model, requirements, use cases, analysis, design, code map) lives in `docs/<language>/technical/` of its repository. The portal shows it as the "Technical documentation" section of the product: the `README.md` of a folder is its index, the diagrams (`.svg`) and tables (`.csv`) next to a page are published with it, and links between files keep working. The colours of the diagrams are `rup/didactika.theme.json`; copy it into the `theme` key of the `rup.config.json` of the product.
 
 ## Publishing
 

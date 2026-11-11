@@ -91,7 +91,7 @@
   "join": "Ver todo lo que construimos y aportamos",
   "support": "Apoya a Didactika",
   "supportLink": "Apoya a Didactika",
-  "credits": "Hecho con Starlight · Iconos de Material Symbols · Documentación técnica con rup-flow Pro",
+  "credits": "Hecho con Starlight · Iconos de Material Symbols",
   "languageFilter": "Buscar un idioma",
   "languageNone": "Ningún idioma coincide.",
   "pathHint": "Léelas en este orden; cada una se apoya en la anterior.",
@@ -105,7 +105,6 @@
   "tech.use-cases": "Casos de uso",
   "orgTechTitle": "Documentación técnica",
   "orgTechText": "Cómo está construido cada producto: modelo de dominio, casos de uso, análisis, diseño y un mapa hacia el código, dibujados con los colores de Didactika.",
-  "orgTechLink": "Escrita con rup-flow Pro",
   "orgSupportTitle": "Apoya a Didactika",
   "orgSupportText": "Didactika es de código abierto. Si sus plugins y esta documentación te ayudan, puedes apoyar a quienes los mantienen.",
   "orgSupportCta": "Apoyar el proyecto"
