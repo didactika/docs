@@ -1,0 +1,5 @@
+{
+  "products": [
+    {"repo": "didactika/moodle-local_delegateaccount", "kind": "plugin"}
+  ]
+}

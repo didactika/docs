@@ -1,0 +1,45 @@
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  # Every day, so a change in the documentation of a product that did not notify this repository still reaches the site.
+  schedule:
+    - cron: '23 5 * * *'
+  # A product repository tells this one when its docs/ changes (see the plan, docs-notify).
+  repository_dispatch:
+    types: [docs-changed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      # Pages is turned on once by an administrator, with GitHub Actions as its source (gh api -X POST repos/<owner>/<repo>/pages -f build_type=workflow):
+      # the token of a workflow cannot create the site.
+      - uses: actions/configure-pages@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - id: deployment
+        uses: actions/deploy-pages@v4

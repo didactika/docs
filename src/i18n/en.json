@@ -1,0 +1,10 @@
+{
+  "plugins": "Plugins",
+  "pluginsDescription": "The Moodle plugins of Didactika.",
+  "packages": "Packages",
+  "packagesDescription": "The npm packages of Didactika.",
+  "name": "Name",
+  "summary": "Summary",
+  "translationMissing": "This page is not available in {language} yet. You are reading the English version.",
+  "translationOutdated": "The {language} version of this page is older than the English one, so the English version is shown."
+}

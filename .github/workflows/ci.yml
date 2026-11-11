@@ -1,0 +1,36 @@
+name: CI
+
+# Only on pull requests. A push to main is built, checked and published by the Pages workflow, which runs the same build, so building it here
+# too would run the same job twice for every merge.
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # The job the ruleset of the repository requires (docs-site in the octoform policy). It tests the resolution of versions and languages, reads
+  # the documentation of every product and builds the site, so a red site never reaches main, which is what gets published.
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: dist
+          retention-days: 7

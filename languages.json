@@ -1,0 +1,4 @@
+[
+  {"code": "en", "name": "English", "dir": "ltr", "enabled": true, "source": true, "required": true},
+  {"code": "es", "name": "Español", "dir": "ltr", "enabled": true, "required": true}
+]

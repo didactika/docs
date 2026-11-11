@@ -1,0 +1,10 @@
+{
+  "plugins": "Plugins",
+  "pluginsDescription": "Los plugins de Moodle de Didactika.",
+  "packages": "Paquetes",
+  "packagesDescription": "Los paquetes npm de Didactika.",
+  "name": "Nombre",
+  "summary": "Resumen",
+  "translationMissing": "Esta página aún no está disponible en {language}. Estás leyendo la versión en inglés.",
+  "translationOutdated": "La versión en {language} de esta página es anterior a la inglesa, así que se muestra la versión en inglés."
+}
