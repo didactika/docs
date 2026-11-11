@@ -1,0 +1,42 @@
+[
+  {
+    "component": "tool_openapi", "repo": "didactika/moodle-tool_openapi",
+    "title": {"en": "OpenAPI", "es": "OpenAPI"},
+    "summary": {"en": "Publishes the web service catalog of the site as an OpenAPI 3.1 document, with a bundled Swagger UI viewer and four independent ways to control who may read it.", "es": "Publica el catálogo de servicios web del sitio como un documento OpenAPI 3.1, con un visor Swagger UI incluido y cuatro formas independientes de controlar quién puede leerlo."}
+  },
+  {
+    "component": "local_servicemanager", "repo": "didactika/moodle-local_servicemanager",
+    "title": {"en": "Service manager", "es": "Gestor de servicios"},
+    "summary": {"en": "Provisions and manages web services from version-controlled YAML schemas: it creates the service user, role, capabilities, external service and token.", "es": "Aprovisiona y gestiona servicios web a partir de esquemas YAML versionados: crea el usuario del servicio, el rol, las capacidades, el servicio externo y el token."}
+  },
+  {
+    "component": "local_iconrestyle", "repo": "didactika/moodle-local_iconrestyle",
+    "title": {"en": "Icon restyle", "es": "Estilo de iconos"},
+    "summary": {"en": "Restyles the icons of the whole site, a category, a course or an activity from one visual designer, with no theme changes and no code.", "es": "Cambia el estilo de los iconos de todo el sitio, de una categoría, un curso o una actividad desde un único diseñador visual, sin tocar el tema ni escribir código."}
+  },
+  {
+    "component": "local_autograder", "repo": "didactika/moodle-local_autograder",
+    "title": {"en": "Autograder", "es": "Autocalificador"},
+    "summary": {"en": "Automatically grades the completed activities that a teacher has not graded after the deadline.", "es": "Califica automáticamente las actividades completadas que el docente no ha calificado pasada la fecha límite."}
+  },
+  {
+    "component": "report_autograder", "repo": "didactika/moodle-report_autograder",
+    "title": {"en": "Autograder report", "es": "Informe del autocalificador"},
+    "summary": {"en": "Reviews what the Autograder graded, what is pending and what failed, per activity, course or site.", "es": "Revisa lo que calificó el Autocalificador, lo que está pendiente y lo que falló, por actividad, curso o sitio."}
+  },
+  {
+    "component": "local_filebank", "repo": "didactika/moodle-local_filebank",
+    "title": {"en": "FileBank", "es": "FileBank"},
+    "summary": {"en": "Organises the public files of related courses into a reusable library, with profiles that say which courses belong together.", "es": "Organiza los archivos públicos de cursos relacionados en una biblioteca reutilizable, con perfiles que indican qué cursos van juntos."}
+  },
+  {
+    "component": "repository_filebank", "repo": "didactika/moodle-repository_filebank",
+    "title": {"en": "FileBank repository", "es": "Repositorio FileBank"},
+    "summary": {"en": "Offers the FileBank library inside the file picker, so teachers can pick files and whole folders from related courses.", "es": "Ofrece la biblioteca de FileBank dentro del selector de archivos, para que los docentes elijan archivos y carpetas enteras de cursos relacionados."}
+  },
+  {
+    "component": "repository_multipicker", "repo": "didactika/moodle-repository_multipicker",
+    "title": {"en": "Multi-picker", "es": "Selector múltiple"},
+    "summary": {"en": "Adds multiple selection of files and folders, with a review before the import, to the Server files repository.", "es": "Añade la selección múltiple de archivos y carpetas, con una revisión antes de importar, al repositorio de archivos del servidor."}
+  }
+]

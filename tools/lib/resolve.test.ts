@@ -27,6 +27,12 @@ describe('parseFrontmatter', () => {
         assert.equal(data.title, 'Hello');
     });
 
+    it('says why a front matter is not valid, instead of failing', () => {
+        const {data, error} = parseFrontmatter('---\ntitle: A\nsummary: One: two\n---\nText\n');
+        assert.deepEqual(data, {});
+        assert.match(error!, /Nested mappings/);
+    });
+
     it('returns no data for a page without front matter', () => {
         assert.deepEqual(parseFrontmatter('Just text').data, {});
     });
@@ -204,6 +210,14 @@ describe('languages', () => {
 });
 
 describe('files and lines', () => {
+    it('reports a page whose front matter is not valid, and goes on', () => {
+        const result = resolveProduct([line('m405', null, {'en/a.md': '---\ntitle: A\nsummary: One: two\n---\n', 'en/b.md': page('B')})], [EN]);
+        const issue = result.issues.find((candidate) => candidate.code === 'invalid-frontmatter')!;
+        assert.equal(issue.level, 'error');
+        assert.equal(issue.path, 'en/a.md');
+        assert.equal(lineOf(result, 'm405').pages.length, 2);
+    });
+
     it('rejects the same page as .md and .mdx in one line', () => {
         const result = resolveProduct([line('m405', null, {'en/a.md': page('A'), 'en/a.mdx': page('A')})], [EN]);
         assert.ok(codes(result).includes('error:duplicate-page'));

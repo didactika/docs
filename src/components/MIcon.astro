@@ -1,0 +1,35 @@
+---
+/**
+ * An icon of Material Symbols (the rounded set), drawn inline so it takes the colour and the size of the text around it.
+ * Use the name as Iconify spells it, e.g. `shield-person-rounded`; every icon of the site is looked up here, and one that does not
+ * exist stops the build instead of leaving a hole in a page.
+ */
+import set from '@iconify-json/material-symbols/icons.json';
+
+interface Props {
+    name: string;
+    /** A text for people who cannot see the icon. Without it the icon is decoration and is hidden from them. */
+    label?: string;
+    class?: string;
+}
+
+const {name, label, class: className} = Astro.props;
+const icons = set.icons as Record<string, {body: string; width?: number; height?: number}>;
+const aliases = (set as {aliases?: Record<string, {parent: string}>}).aliases ?? {};
+const icon = icons[name] ?? icons[aliases[name]?.parent ?? ''];
+if (!icon) {
+    throw new Error(`The Material icon "${name}" does not exist.`);
+}
+const size = icon.width ?? set.width ?? 24;
+---
+
+<svg
+    class:list={['mi', className]}
+    viewBox={`0 0 ${size} ${icon.height ?? set.height ?? size}`}
+    fill="currentColor"
+    role={label ? 'img' : undefined}
+    aria-label={label}
+    aria-hidden={label ? undefined : 'true'}
+    focusable="false"
+    set:html={icon.body}
+/>

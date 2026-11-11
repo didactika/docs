@@ -1,0 +1,22 @@
+---
+/**
+ * The foot of a page of the documentation: the link to edit the page, and the foot of the site (see ProjectFoot.astro). There is no
+ * "previous / next" here: the way through the documentation is the guide of each product, not the order of its files.
+ */
+import MIcon from './MIcon.astro';
+import {t} from '../lib/site';
+
+const route = Astro.locals.starlightRoute;
+const lang = route.lang;
+const editUrl = route.editUrl;
+---
+
+{
+    editUrl && (
+        <div class="d-pagefoot">
+            <a href={editUrl.href}>
+                <MIcon name="edit-rounded" /> {t(lang, 'editPage')}
+            </a>
+        </div>
+    )
+}

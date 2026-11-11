@@ -1,0 +1,168 @@
+---
+/** The home of the portal: what it is, the products that changed last, and how every documentation is organised. */
+import Logo from '../../components/Logo.astro';
+import MIcon from '../../components/MIcon.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import Landing from '../../layouts/Landing.astro';
+import {localised, productUrl, productsOf, site, t} from '../../lib/site';
+
+export function getStaticPaths() {
+    return site().languages.map((language) => ({params: {lang: language.code}}));
+}
+
+const {lang} = Astro.params as {lang: string};
+const data = site();
+
+/** What the home shows of each family of products before it sends the reader to the whole catalog. */
+const SHOWN = 3;
+const byChange = (a: {updated?: number}, b: {updated?: number}): number => (b.updated ?? 0) - (a.updated ?? 0);
+const plugins = productsOf('plugin').sort(byChange);
+const packages = productsOf('package').sort(byChange);
+const featured = data.products[0];
+const stats = {
+    products: data.products.length,
+    versions: data.products.reduce((sum, product) => sum + product.lines.length, 0),
+    pages: data.products.reduce((sum, product) => sum + product.lines.reduce((total, line) => total + line.pages, 0), 0),
+};
+const pluginsTotal = plugins.length + data.coming.length;
+
+const organised = [
+    {icon: 'rocket-launch-rounded', title: 'orgStartTitle', text: 'orgStartText'},
+    {icon: 'lightbulb-rounded', title: 'orgConceptsTitle', text: 'orgConceptsText'},
+    {icon: 'task-alt-rounded', title: 'orgGuidesTitle', text: 'orgGuidesText'},
+    {icon: 'menu-book-rounded', title: 'orgReferenceTitle', text: 'orgReferenceText'},
+    {icon: 'schema-rounded', title: 'orgTechTitle', text: 'orgTechText'},
+];
+---
+
+<Landing lang={lang} title="Didactika Docs" description={t(lang, 'heroLead')}>
+    <section class="d-hero">
+        <div class="d-wrap d-hero-in">
+            <div>
+                <span class="d-eyebrow-pill"><MIcon name="verified-rounded" /> {t(lang, 'heroEyebrow')}</span>
+                <h1 class="d-h1">{t(lang, 'heroTitleA')} <em>{t(lang, 'heroTitleB')}</em></h1>
+                <p class="d-hero-lead">{t(lang, 'heroLead')}</p>
+                <div class="d-actions">
+                    <a class="d-btn" href="#plugins">{t(lang, 'heroCta')} <MIcon name="arrow-forward-rounded" /></a>
+                    <a class="d-btn ghost" href="#organised">{t(lang, 'heroCtaSecondary')} <MIcon name="arrow-forward-rounded" /></a>
+                </div>
+            </div>
+            <div class="d-hero-card" aria-hidden="true">
+                <span class="d-mono">Didactika Docs / {t(lang, 'plugins')} · {t(lang, 'packages')}</span>
+                <div class="d-hero-mark"><Logo size="xl" /></div>
+                <div class="d-hero-products">
+                    {data.products.slice(0, 4).map((product) => <span class:list={['d-tile', {soft: !product.icon}]} title={localised(product.title, lang)}>{product.icon ? <img src={product.icon} alt="" /> : <MIcon name="extension-rounded" />}</span>)}
+                    <span class="d-tile ghost"><MIcon name="more-horiz-rounded" /></span>
+                </div>
+                <div class="d-hero-chips">
+                    <span class="d-chip accent"><MIcon name="extension-rounded" />{t(lang, 'plugins')}</span>
+                    <span class="d-chip"><MIcon name="deployed-code-rounded" />{t(lang, 'packages')}</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="d-wrap">
+        <div class="d-stats d-stats-3">
+            <div class="d-stat"><b>{stats.products}</b><span><MIcon name="extension-rounded" />{t(lang, 'statProducts')}</span></div>
+            <div class="d-stat"><b>{stats.versions}</b><span><MIcon name="layers-rounded" />{t(lang, 'statVersions')}</span></div>
+            <div class="d-stat"><b>{stats.pages}</b><span><MIcon name="article-rounded" />{t(lang, 'statPages')}</span></div>
+        </div>
+    </div>
+
+    <section class="d-section" id="plugins">
+        <div class="d-wrap">
+            <div class="d-section-head">
+                <div>
+                    <h2>{t(lang, 'plugins')}</h2>
+                    <p>{t(lang, 'pluginsLead')}</p>
+                </div>
+                {pluginsTotal > SHOWN && <a class="d-btn ghost" href={`/${lang}/plugins/`}>{t(lang, 'viewAll')} <MIcon name="arrow-forward-rounded" /></a>}
+            </div>
+            <div class="d-grid">
+                {plugins.slice(0, SHOWN).map((product) => <ProductCard lang={lang} product={product} />)}
+                {data.coming.slice(0, Math.max(0, SHOWN - plugins.length)).map((soon) => <ProductCard lang={lang} soon={soon} />)}
+            </div>
+        </div>
+    </section>
+
+    <section class="d-section" id="packages">
+        <div class="d-wrap">
+            <div class="d-section-head">
+                <div>
+                    <h2>{t(lang, 'packages')}</h2>
+                    <p>{t(lang, 'packagesLead')}</p>
+                </div>
+                {packages.length > SHOWN && <a class="d-btn ghost" href={`/${lang}/packages/`}>{t(lang, 'viewAll')} <MIcon name="arrow-forward-rounded" /></a>}
+            </div>
+            {
+                packages.length > 0 ? (
+                    <div class="d-grid">
+                        {packages.slice(0, SHOWN).map((product) => <ProductCard lang={lang} product={product} />)}
+                    </div>
+                ) : (
+                    <div class="d-empty">
+                        <span class="d-tile soft"><MIcon name="deployed-code-rounded" /></span>
+                        <div>
+                            <h3>{t(lang, 'packagesEmptyTitle')}</h3>
+                            <p>{t(lang, 'packagesEmptyText')}</p>
+                        </div>
+                    </div>
+                )
+            }
+        </div>
+    </section>
+
+    <section class="d-section" id="organised">
+        <div class="d-wrap">
+            <h2>{t(lang, 'organisedTitle')}</h2>
+            <p>{t(lang, 'organisedLead')}</p>
+            <div class="d-cards">
+                {
+                    organised.map((card) => (
+                        <div class="d-card">
+                            <span class="d-tile soft"><MIcon name={card.icon} /></span>
+                            <h3>{t(lang, card.title)}</h3>
+                            <p>{t(lang, card.text)}</p>
+                        </div>
+                    ))
+                }
+            </div>
+        </div>
+    </section>
+
+    <section class="d-band">
+        <div class="d-wrap d-band-in single">
+            <div>
+                <h2>{t(lang, 'versionsTitle')}</h2>
+                <p>{t(lang, 'versionsText')}</p>
+                {
+                    featured && (
+                        <div class="d-pillrow">
+                            {[...featured.lines].reverse().map((line) => (
+                                <a class="d-pill" href={productUrl(lang, featured, line.id)}>
+                                    <MIcon name="call-split-rounded" />
+                                    {line.label}
+                                    <small>{line.release}</small>
+                                </a>
+                            ))}
+                        </div>
+                    )
+                }
+            </div>
+        </div>
+    </section>
+
+    <section class="d-section">
+        <div class="d-wrap">
+            <div class="d-more">
+                <span class="d-tile soft"><MIcon name="hub-rounded" /></span>
+                <div>
+                    <h2>{t(lang, 'moreTitle')}</h2>
+                    <p>{t(lang, 'moreText')}</p>
+                </div>
+                <a class="d-btn ghost" href={lang === 'es' ? 'https://didactika.org/resources/' : 'https://didactika.org/en/resources/'}>{t(lang, 'moreCta')} <MIcon name="arrow-outward-rounded" /></a>
+            </div>
+        </div>
+    </section>
+</Landing>

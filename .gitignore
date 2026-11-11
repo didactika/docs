@@ -7,3 +7,9 @@ dist/
 /src/content/docs/*/plugins/
 /src/content/docs/*/packages/
 /src/data/products.generated.json
+/src/data/project.generated.json
+
+# What the previews of a developer need; see compose.yaml.
+/preview.refs.json
+/public/docs-assets/
+/public/product-icons/

@@ -1,0 +1,100 @@
+---
+/**
+ * The foot of every page, the same as the one of the design system: what Didactika is, its co-founders, its collaborators, where to find it
+ * and how to support it. It stays one row however much the project grows: the collaborators are cut at a maximum and the rest is a "+ n"
+ * that leads to the full list. Everything comes from GitHub (tools/project.ts).
+ */
+import Logo from './Logo.astro';
+import MIcon from './MIcon.astro';
+import {project, t} from '../lib/site';
+
+interface Props {
+    lang: string;
+}
+
+const {lang} = Astro.props;
+const {organisation, founders, contributors, funding} = project();
+const max = 8;
+const cofounders = new Set(founders.map((person) => person.login.toLowerCase()));
+const seed = contributors.filter((person) => !cofounders.has(person.login.toLowerCase()));
+const shown = seed.slice(0, max);
+const host = organisation.website ? new URL(organisation.website).host : null;
+const avatar = (url: string): string => `${url}${url.includes('?') ? '&' : '?'}s=64`;
+---
+
+<footer class="d-footer">
+    <div class="d-footer-in">
+        <div class="d-foot-row">
+            <a class="d-foot-brand" href={`/${lang}/`}>
+                <Logo size="lg" />
+                <span><b>Didactika Docs</b><span>{t(lang, 'footAbout')}</span></span>
+            </a>
+
+            <div class="d-foot-people">
+                {
+                    founders.length > 0 && (
+                        <ul class="d-founders" aria-label={t(lang, 'cofounders')}>
+                            {founders.map((person) => (
+                                <li>
+                                    <a class="d-founder" href={person.url} title={`${person.name ?? person.login} · GitHub`}>
+                                        <img src={avatar(person.avatar)} alt="" width="32" height="32" loading="lazy" />
+                                        <span><b>{person.name ?? person.login}</b><small>{t(lang, 'cofounder')}</small></span>
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    )
+                }
+                <div class:list={['d-collabs', {'has-people': seed.length > 0}]} data-people data-org={organisation.login} data-exclude={[...cofounders].join(',')} data-max={max} data-all={organisation.peopleUrl} data-more={t(lang, 'allCollaborators')} data-seed={JSON.stringify(seed)}>
+                    <span class="d-collabs-label">{t(lang, 'collaborators')}</span>
+                    <span class="d-stack" data-people-list>
+                        {shown.map((person) => <a href={person.url} title={person.login} aria-label={person.login}><img src={avatar(person.avatar)} alt="" width="32" height="32" loading="lazy" /></a>)}
+                        {seed.length > max && <a class="more" href={organisation.peopleUrl} title={t(lang, 'allCollaborators')}>+{seed.length - max}</a>}
+                    </span>
+                    <a class="d-collab-add" href={organisation.repositoriesUrl} title={t(lang, 'join')} aria-label={t(lang, 'join')}><MIcon name="person-add-rounded" /></a>
+                </div>
+            </div>
+
+            <nav class="d-foot-links" aria-label="Didactika">
+                {organisation.website && <a href={organisation.website}><MIcon name="language-rounded" />{host}</a>}
+                <a href={organisation.url}>
+                    <svg class="mi" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.4c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.4-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z" /></svg>
+                    github.com/{organisation.login}
+                </a>
+                <a href={lang === 'es' ? 'https://didactika.org/resources/' : 'https://didactika.org/en/resources/'}><MIcon name="hub-rounded" />{t(lang, 'resources')}</a>
+            </nav>
+        </div>
+
+        <div class="d-footer-bar">
+            <span>© {organisation.login} · GPL-3.0-or-later</span>
+            {
+                funding ? (
+                    <a class="d-support-link" href={funding.url} rel="noopener">
+                        <MIcon name="favorite-rounded" />
+                        {t(lang, 'supportLink')}
+                    </a>
+                ) : (
+                    <span />
+                )
+            }
+            <span>{t(lang, 'credits')}</span>
+        </div>
+    </div>
+</footer>
+
+<script>
+    import '../scripts/people.ts';
+</script>
+
+<script is:inline>
+    // The table of contents of a page is fixed at the right; where the foot comes up, it gives way instead of staying on top of it.
+    (function () {
+        var foot = document.querySelector('.d-footer');
+        if (!foot) { return; }
+        var root = document.documentElement;
+        var update = function () { root.style.setProperty('--d-foot-overlap', Math.max(0, window.innerHeight - foot.getBoundingClientRect().top) + 'px'); };
+        window.addEventListener('scroll', update, {passive: true});
+        window.addEventListener('resize', update);
+        update();
+    })();
+</script>

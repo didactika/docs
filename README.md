@@ -54,6 +54,26 @@ Node 22.23 or later is required. To try the site with clones you already have, w
 DOCS_SOURCES=/path/to/clones DOCS_NO_FETCH=1 npm run build
 ```
 
+## Seeing it while you work
+
+```bash
+docker compose up        # then open http://localhost:4321/
+docker compose logs -f site
+docker compose down
+```
+
+The site runs in a container with the development server of Astro. The products are read from clones on your machine (the folder above this repository by default, or `DOCS_SOURCES_DIR`), not from GitHub, so what you have committed locally shows up before it is pushed. The documentation is read again every few seconds and the page reloads by itself.
+
+To see branches that are not merged yet, copy `preview.refs.example.json` to `preview.refs.json` and list there, for each product, the branch to read for each line. Anything the synchronisation finds wrong in the documentation is in the log.
+
+## Writing a page
+
+A page is `docs/<language>/<path>.md` in the repository of the product, with a front matter of `title`, `summary` and `order`. A value with a colon must be in quotes (`summary: "Two things: a and b"`); the build says which page breaks it.
+
+- **Alerts:** write the ones of GitHub (`> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`, `> [!CAUTION]`). They read well on GitHub and become asides on the site.
+- **Links to other pages of the product:** `[text](page:guides/install)` or `[text](page:guides/install#step-2)`. The link stays in the version and language the reader is in.
+- **Hide a page** a later version inherits: a file at the same path with `hidden: true` and a `reason`.
+
 ## Adding a product
 
 1. In its repository, add `docs/docs.json` on `main`, and the pages under `docs/en/` and `docs/es/`.
@@ -63,3 +83,21 @@ DOCS_SOURCES=/path/to/clones DOCS_NO_FETCH=1 npm run build
 ## Licence
 
 GPL-3.0-or-later, as Moodle.
+
+## Technical documentation
+
+The technical documentation of a product (domain model, requirements, use cases, analysis, design, code map) lives in `docs/<language>/technical/` of its repository. The portal shows it as the "Technical documentation" section of the product: the `README.md` of a folder is its index, the diagrams (`.svg`) and tables (`.csv`) next to a page are published with it, and links between files keep working. The colours of the diagrams are `rup/didactika.theme.json`; copy it into the `theme` key of the `rup.config.json` of the product.
+
+## Publishing
+
+The site is built and deployed by `.github/workflows/pages.yml` to <https://docs.didactika.org/> on every push to `main`, every day, and when a product repository sends the event `docs-changed`. A product repository sends it with the reusable workflow `docs-notify` of `didactika/.github`, which needs the organisation secret `DOCS_DISPATCH_TOKEN` (a fine-grained token with "Contents: read and write" on this repository).
+
+Turning it on once, by an administrator:
+
+```bash
+gh repo edit didactika/docs --visibility public --accept-visibility-change-consequences
+gh api -X POST repos/didactika/docs/pages -f build_type=workflow
+gh api -X PUT repos/didactika/docs/pages -f cname=docs.didactika.org -F https_enforced=true
+```
+
+and a `CNAME` record `docs` that points to `didactika.github.io` in the DNS of didactika.org.

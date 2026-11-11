@@ -1,0 +1,6 @@
+{
+  "didactika/moodle-local_delegateaccount": {
+    "main": "docs/portal-503",
+    "MOODLE_405_STABLE": "docs/portal-405"
+  }
+}

@@ -1,0 +1,29 @@
+---
+/** Says whether a plugin is in the Moodle plugins directory, from what the directory itself answers (see tools/lib/directory.ts). */
+import MIcon from './MIcon.astro';
+import {t, type DirectoryData} from '../lib/site';
+
+interface Props {
+    lang: string;
+    directory: DirectoryData;
+}
+
+const {lang, directory} = Astro.props;
+---
+
+{
+    directory.published === true && (
+        <span class="d-chip ok" title={directory.releases.map((entry) => `Moodle ${entry.branch}: ${entry.release}`).join(' · ')}>
+            <MIcon name="verified-rounded" />
+            {t(lang, 'published')}
+        </span>
+    )
+}
+{
+    directory.published === false && (
+        <span class="d-chip">
+            <MIcon name="deployed-code-rounded" />
+            {t(lang, 'githubOnly')}
+        </span>
+    )
+}

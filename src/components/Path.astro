@@ -1,0 +1,72 @@
+---
+/**
+ * A route through the documentation for one kind of reader: the pages to read, in order, each with its title and what it is for. The pages
+ * are named by their identifier inside the version (`getting-started/installation`), so the route follows the version the reader is in.
+ *
+ *     <Path title="I administer the site" icon="admin-panel-settings-rounded" time="15 min" pages={['getting-started/installation', ...]} />
+ */
+import {getCollection} from 'astro:content';
+import MIcon from './MIcon.astro';
+import {pageIdOf, productUrl, site, t} from '../lib/site';
+
+interface Props {
+    title: string;
+    icon?: string;
+    /** How long the route takes, as text ("15 min"). */
+    time?: string;
+    /** What the reader is after. */
+    goal?: string;
+    pages: string[];
+}
+
+const {title, icon = 'route-rounded', time, goal, pages} = Astro.props;
+const route = Astro.locals.starlightRoute;
+const data = route.entry.data as {product?: string; line?: string};
+const product = site().products.find((candidate) => candidate.slug === data.product);
+const line = product?.lines.find((candidate) => candidate.id === data.line);
+const lang = route.lang;
+
+const entries = await getCollection('docs');
+const steps = pages.flatMap((page) => {
+    if (!product || !line) {
+        return [];
+    }
+    const slug = page === 'index' ? '' : page.replace(/\/index$/, '');
+    const wanted = (code: string) => `${code}/${product.kind === "plugin" ? "plugins" : "packages"}/${product.slug}/${line.id}${slug ? `/${slug}` : ""}`;
+    const entry = entries.find((candidate) => candidate.id === wanted(lang)) ?? entries.find((candidate) => candidate.id === wanted('en'));
+    if (!entry) {
+        return [];
+    }
+    const summary = (entry.data as {description?: string}).description ?? '';
+    return [{href: `${productUrl(lang, product, line.id)}${slug ? `${slug}/` : ""}`, title: entry.data.title, summary, id: pageIdOf(entry.id, product.slug, line.id)}];
+});
+---
+
+{
+    steps.length > 0 && (
+        <section class="d-path">
+            <header>
+                <span class="d-tile soft"><MIcon name={icon} /></span>
+                <div>
+                    <h3>{title}</h3>
+                    {goal && <p>{goal}</p>}
+                </div>
+                {time && <span class="d-chip"><MIcon name="schedule-rounded" />{time}</span>}
+            </header>
+            <ol>
+                {
+                    steps.map((step) => (
+                        <li>
+                            <a href={step.href}>
+                                <b>{step.title}</b>
+                                {step.summary && <span>{step.summary}</span>}
+                            </a>
+                            <MIcon name="arrow-forward-rounded" />
+                        </li>
+                    ))
+                }
+            </ol>
+            <footer>{t(lang, 'pathHint')}</footer>
+        </section>
+    )
+}

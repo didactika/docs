@@ -4,7 +4,7 @@ import {mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {dirname, join} from 'node:path';
 import {after, before, describe, it} from 'node:test';
-import {lineLabel, moodleVersion, readProduct, readVersionPhp} from './source.ts';
+import {lineLabel, moodleVersion, readComponent, readProduct, readVersionPhp} from './source.ts';
 
 const versionPhp = (release: string, low: number, high: number): string =>
     `<?php\n$plugin->version = 2026110700;\n$plugin->release   = '${release}';\n$plugin->supported = [${low}, ${high}];\n`;
@@ -17,6 +17,11 @@ describe('version.php', () => {
     it('is not a line without the -m suffix or the range', () => {
         assert.equal(readVersionPhp(versionPhp('1.1.1', 405, 502)), undefined);
         assert.equal(readVersionPhp("<?php\n$plugin->release = '1.0.0-m405';\n"), undefined);
+    });
+
+    it('reads the component of the plugin', () => {
+        assert.equal(readComponent("<?php\n$plugin->component = 'local_demo';\n"), 'local_demo');
+        assert.equal(readComponent('<?php\n'), null);
     });
 
     it('writes the label of a line', () => {
@@ -78,6 +83,20 @@ describe('a repository with two lines', () => {
         assert.deepEqual([...base.files.keys()].sort(), ['_assets/shot.png', 'en/index.md', 'es/index.md']);
         assert.ok(next.files.has('en/guides/new.md'));
         assert.ok(!base.files.has('en/guides/new.md'));
+    });
+
+    it('reads a line from another ref, to preview what is not merged yet', () => {
+        git('checkout', '-q', '-b', 'preview', 'main');
+        write('docs/en/index.md', '---\ntitle: Preview\n---\n');
+        git('add', '-A');
+        git('commit', '-q', '-m', 'preview');
+        git('checkout', '-q', 'main');
+        const preview = readProduct(repo, {refs: {main: 'preview'}});
+        assert.equal(preview.lines[1].branch, 'main');
+        assert.ok(preview.lines[1].files.get('en/index.md')!.includes('Preview'));
+        assert.ok(!readProduct(repo).lines[1].files.get('en/index.md')!.includes('Preview'));
+        assert.throws(() => readProduct(repo, {refs: {main: 'does-not-exist'}}), /is not a ref/);
+        assert.throws(() => readProduct(repo, {refs: {feature: 'preview'}}), /is not a branch that is a line/);
     });
 
     it('keeps a binary asset byte for byte', () => {

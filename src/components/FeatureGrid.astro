@@ -1,0 +1,11 @@
+---
+/** The grid that holds the Feature cards of a page. */
+interface Props {
+    /** How many columns at most; the cards wrap on a narrow screen. */
+    columns?: 2 | 3 | 4;
+}
+
+const {columns = 3} = Astro.props;
+---
+
+<div class="d-features not-content" data-columns={columns}><slot /></div>

@@ -38,6 +38,12 @@ export interface SourceLine extends LineInput {
 
 export interface SourceProduct {
     docs: DocsJson | null;
+    /** The component of Moodle (`local_delegateaccount`), from the `version.php` of the default branch. */
+    component: string | null;
+    /** The icon of the plugin (`pix/icon.svg` of the default branch), when it has one. */
+    iconSvg: string | null;
+    /** When the code of the product last changed, in seconds, on any of its lines. 0 when it is not known. */
+    updated: number;
     lines: SourceLine[];
     issues: Issue[];
 }
@@ -64,6 +70,9 @@ export const lineLabel = (low: number, high: number): string =>
     low === high ? `Moodle ${moodleVersion(low)}` : `Moodle ${moodleVersion(low)} – ${moodleVersion(high)}`;
 
 /** Reads the identity of a line from the `version.php` of its branch. */
+/** The component of a plugin, from its `version.php`. */
+export const readComponent = (php: string): string | null => /\$plugin->component\s*=\s*['"]([^'"]+)['"]/.exec(php)?.[1] ?? null;
+
 export function readVersionPhp(php: string): {id: string; release: string; low: number; high: number} | undefined {
     const release = /\$plugin->release\s*=\s*['"]([^'"]+)['"]/.exec(php)?.[1];
     const id = release ? /-m(\d+)$/.exec(release)?.[1] : undefined;
@@ -74,8 +83,13 @@ export function readVersionPhp(php: string): {id: string; release: string; low: 
     return {id: `m${id}`, release, low: Number(supported[1]), high: Number(supported[2])};
 }
 
+export interface ReadOptions {
+    /** Reads a line from another ref than its own branch, to see what is not merged yet: `{main: 'docs/portal-503'}`. */
+    refs?: Record<string, string>;
+}
+
 /** Local branches and the ones of `origin`, by branch name; `origin` wins because it is what is published. */
-function branches(repo: string): Map<string, string> {
+function branches(repo: string, overrides: Record<string, string> = {}): Map<string, string> {
     const refs = git(repo, ['for-each-ref', '--format=%(refname)', 'refs/heads', 'refs/remotes/origin']).split('\n').filter(Boolean);
     const found = new Map<string, string>();
     for (const ref of refs) {
@@ -85,6 +99,15 @@ function branches(repo: string): Map<string, string> {
         if (name && LINE_BRANCH.test(name) && (remote || !found.has(name))) {
             found.set(name, ref);
         }
+    }
+    for (const [name, ref] of Object.entries(overrides)) {
+        if (!LINE_BRANCH.test(name)) {
+            throw new Error(`${name} is not a branch that is a line (main or MOODLE_<version>_STABLE).`);
+        }
+        if (tryGit(repo, ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`]) === undefined) {
+            throw new Error(`${ref}, given for ${name}, is not a ref of ${repo}.`);
+        }
+        found.set(name, ref);
     }
     return found;
 }
@@ -99,16 +122,16 @@ function filesOf(repo: string, ref: string): Map<string, string> {
             continue;
         }
         // Binary files are kept as Latin-1 text, which is lossless, and written back the same way.
-        const binary = path.startsWith('_assets/') && !/\.(?:md|mdx|svg|txt|json)$/.test(path);
+        const binary = !/\.(?:md|mdx|svg|txt|json|csv|puml)$/.test(path);
         files.set(path, git(repo, ['show', `${ref}:${name}`], binary ? 'latin1' : 'utf8'));
     }
     return files;
 }
 
 /** Reads the product documented by the repository in `repo`. */
-export function readProduct(repo: string): SourceProduct {
+export function readProduct(repo: string, options: ReadOptions = {}): SourceProduct {
     const issues: Issue[] = [];
-    const found = branches(repo);
+    const found = branches(repo, options.refs);
     const defaultRef = found.get(DEFAULT_BRANCH);
     const docsRaw = defaultRef ? tryGit(repo, ['show', `${defaultRef}:docs/docs.json`]) : undefined;
     const docs = docsRaw ? (JSON.parse(docsRaw) as DocsJson) : null;
@@ -145,5 +168,10 @@ export function readProduct(repo: string): SourceProduct {
         line.extends = declared && 'extends' in declared ? (declared.extends ?? null) : index === 0 ? null : lines[index - 1].id;
     });
 
-    return {docs, lines, issues};
+    const defaultPhp = defaultRef ? tryGit(repo, ['show', `${defaultRef}:version.php`]) : undefined;
+    const iconSvg = defaultRef ? (tryGit(repo, ['show', `${defaultRef}:pix/icon.svg`]) ?? null) : null;
+
+    const updated = Math.max(0, ...[...found.values()].map((ref) => Number(tryGit(repo, ['log', '-1', '--format=%ct', ref])?.trim()) || 0));
+
+    return {docs, component: defaultPhp ? readComponent(defaultPhp) : null, iconSvg, updated, lines, issues};
 }

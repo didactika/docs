@@ -28,7 +28,11 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      - run: npm run icons
       - run: npm run build
+        env:
+          # The foot of the site reads the people and the funding of the organisation from GitHub (tools/project.ts).
+          GITHUB_TOKEN: ${{ github.token }}
       - uses: actions/upload-artifact@v4
         with:
           name: site

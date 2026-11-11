@@ -1,0 +1,29 @@
+---
+/**
+ * A card of a feature or of a path through the documentation, with a Material icon. Use it inside a FeatureGrid in a page (`.mdx`):
+ *
+ *   <FeatureGrid>
+ *     <Feature icon="schedule-rounded" title="Time-bound">A start, an end and revocation.</Feature>
+ *     <Feature icon="rocket-launch-rounded" title="Quick start" href="page:getting-started/quick-start">Your first delegation.</Feature>
+ *   </FeatureGrid>
+ *
+ * With `href` the whole card is a link, and `page:` points at another page of the product in the version the reader is in.
+ */
+import MIcon from './MIcon.astro';
+
+interface Props {
+    icon: string;
+    title: string;
+    href?: string;
+}
+
+const {icon, title, href} = Astro.props;
+const Tag = href ? 'a' : 'div';
+---
+
+<Tag class="d-feature not-content" href={href}>
+    <span class="d-tile soft"><MIcon name={icon} /></span>
+    <h3>{title}</h3>
+    <p><slot /></p>
+    {href && <span class="d-feature-go"><MIcon name="arrow-forward-rounded" /></span>}
+</Tag>

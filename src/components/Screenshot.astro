@@ -1,0 +1,23 @@
+---
+/**
+ * A screen of the plugin in a window, with an optional address and caption. Use it in a page of the documentation (`.mdx`):
+ *
+ *   <Screenshot src="asset:manage.png" alt="The management page" caption="The list of authorised users." url="/local/delegateaccount/pages/manage.php" />
+ *
+ * `asset:` is the file in the `_assets` folder of the documentation, in the version the reader is in.
+ */
+interface Props {
+    src: string;
+    alt: string;
+    caption?: string;
+    url?: string;
+}
+
+const {src, alt, caption, url} = Astro.props;
+---
+
+<figure class="d-shot not-content">
+    <div class="d-shot-bar"><i></i><i></i><i></i>{url && <span>{url}</span>}</div>
+    <img src={src} alt={alt} loading="lazy" decoding="async" />
+    {caption && <figcaption>{caption}</figcaption>}
+</figure>

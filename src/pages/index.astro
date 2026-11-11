@@ -1,0 +1,21 @@
+---
+// The address without a language: the reader goes to the language of the browser if the site has it, and to English if not.
+import {site} from '../lib/site';
+
+const codes = site().languages.map((language) => language.code);
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Didactika Docs</title>
+        <meta http-equiv="refresh" content="0; url=/en/" />
+        <link rel="canonical" href="/en/" />
+        <script is:inline define:vars={{codes}}>
+            var wanted = (navigator.language || 'en').slice(0, 2).toLowerCase();
+            location.replace('/' + (codes.indexOf(wanted) >= 0 ? wanted : 'en') + '/');
+        </script>
+    </head>
+    <body></body>
+</html>

@@ -1,0 +1,106 @@
+---
+/**
+ * The header of the site, the same on the home, on the catalog and on every page of the documentation: the mark of Didactika, the product
+ * and version the reader is in, the search, the language, the colour theme and the repository of the organisation.
+ */
+import LanguageMenu from './LanguageMenu.astro';
+import Logo from './Logo.astro';
+import MIcon from './MIcon.astro';
+import SiteSearch from './SiteSearch.astro';
+import {localised, productUrl, project, site, t} from '../lib/site';
+
+interface Props {
+    lang: string;
+    /** The address of the page, to offer the same page in another language. */
+    path: string;
+    productSlug?: string;
+    /** The version of the page. */
+    line?: string;
+    /** The page inside its version (`guides/install`, or `index`), to offer the same page in another version. */
+    pageId?: string;
+}
+
+const {lang, path, productSlug, line, pageId} = Astro.props;
+const data = site();
+const product = data.products.find((candidate) => candidate.slug === productSlug);
+const current = product?.lines.find((candidate) => candidate.id === line);
+
+const funding = project().funding;
+
+/** The same page in another version when it exists there, and the overview of that version when it does not. */
+const inVersion = (id: string): string => {
+    const target = product!.lines.find((candidate) => candidate.id === id)!;
+    const exists = !pageId || pageId === 'index' || target.pageIds.includes(pageId);
+    return productUrl(lang, product!, id) + (exists && pageId && pageId !== 'index' ? `${pageId}/` : '');
+};
+
+const logo = '/brand/didactika-logo.png';
+---
+
+<div class="d-head">
+    <a class="d-brand" href={`/${lang}/`} aria-label="Didactika Docs">
+        <Logo />
+        <span class="d-wordmark"><b>Didactika Docs</b><small>{t(lang, 'brandBy')}</small></span>
+    </a>
+
+    <div class="d-head-mid d-hide-md">
+        {
+            product && (
+                <a class="d-dd-link d-chip accent" href={productUrl(lang, product)}>
+                    <MIcon name="extension-rounded" />
+                    {localised(product.title, lang)}
+                </a>
+            )
+        }
+        {
+            product && current && (
+                <details class="d-dd">
+                    <summary aria-label={t(lang, 'version')}>
+                        <MIcon name="call-split-rounded" />
+                        {current.label}
+                        <MIcon name="expand-more-rounded" />
+                    </summary>
+                    <div class="d-dd-menu">
+                        {[...product.lines].reverse().map((candidate) => (
+                            <a href={inVersion(candidate.id)} aria-current={candidate.id === line ? 'true' : undefined}>
+                                <span>{candidate.label}</span>
+                                <small>{candidate.latest ? t(lang, 'latest') : candidate.release}</small>
+                            </a>
+                        ))}
+                    </div>
+                </details>
+            )
+        }
+    </div>
+
+    <div class="d-head-search">
+        <SiteSearch lang={lang} line={current && !current.latest ? current.id : undefined} />
+    </div>
+
+    <div class="d-head-tools">
+        <LanguageMenu lang={lang} path={path} coverage={current?.coverage} />
+        <span class="d-sep d-hide-md" aria-hidden="true"></span>
+        {
+            funding && (
+                <a class="d-iconbtn d-heart" href={funding.url} rel="noopener" aria-label={t(lang, 'support')} title={t(lang, 'support')}>
+                    <MIcon name="favorite-rounded" />
+                </a>
+            )
+        }
+        <button type="button" class="d-iconbtn d-theme" data-theme-toggle aria-label={t(lang, 'theme')} title={t(lang, 'theme')}>
+            <span class="d-seg-light"><MIcon name="light-mode-rounded" /></span>
+            <span class="d-seg-dark"><MIcon name="dark-mode-rounded" /></span>
+        </button>
+        <a class="d-iconbtn d-hide-md" href="https://github.com/didactika" aria-label={t(lang, 'github')} title={t(lang, 'github')}>
+            <svg class="mi" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.4c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.4-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z" /></svg>
+        </a>
+    </div>
+</div>
+
+<script is:inline>
+    document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => {
+        const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next;
+        try { localStorage.setItem('starlight-theme', next); } catch (error) { /* the page works without storage */ }
+    });
+</script>

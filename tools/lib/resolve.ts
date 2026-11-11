@@ -99,16 +99,24 @@ export interface Resolution {
 
 const PAGE = /^([A-Za-z][A-Za-z0-9_-]*)\/(.+)(\.mdx?)$/;
 const ASSETS = '_assets/';
+/** What may sit next to a page inside a language folder: its diagrams, images and tables. */
+const MEDIA = /^[A-Za-z][A-Za-z0-9_-]*\/.+\.(?:svg|png|webp|jpe?g|gif|csv|puml)$/;
 
 /** Reads the front matter of a page. */
-export function parseFrontmatter(raw: string): {data: Record<string, unknown>; body: string} {
+export function parseFrontmatter(raw: string): {data: Record<string, unknown>; body: string; error?: string} {
     const text = raw.replace(/^﻿/, '').replace(/\r\n/g, '\n');
     const match = /^---\n([\s\S]*?)\n---(?:\n|$)/.exec(text);
     if (!match) {
         return {data: {}, body: text};
     }
-    const data = parseYaml(match[1]);
-    return {data: data && typeof data === 'object' && !Array.isArray(data) ? (data as Record<string, unknown>) : {}, body: text.slice(match[0].length)};
+    const body = text.slice(match[0].length);
+    try {
+        const data = parseYaml(match[1]);
+        return {data: data && typeof data === 'object' && !Array.isArray(data) ? (data as Record<string, unknown>) : {}, body};
+    } catch (error) {
+        // A front matter that is not valid YAML gives no data; the caller reports why.
+        return {data: {}, body, error: (error instanceof Error ? error.message : String(error)).split('\n')[0]};
+    }
 }
 
 const normalise = (content: string): string => content.replace(/^﻿/, '').replace(/\r\n/g, '\n').trimEnd();
@@ -169,9 +177,15 @@ export function resolveProduct(lines: LineInput[], languages: LanguageDef[]): Re
             }
             const match = PAGE.exec(path);
             if (!match) {
+                // The diagrams and tables that a page of the technical documentation shows sit next to it.
+                if (MEDIA.test(path)) {
+                    assets.set(path, content);
+                }
                 continue;
             }
-            const [, lang, id, ext] = match;
+            const [, lang, rawId, ext] = match;
+            // The README of a folder is its index, as on GitHub.
+            const id = rawId.replace(/(^|\/)README$/, '$1index');
             if (!known.has(lang)) {
                 issues.push({level: 'warning', code: 'unknown-language', line: line.id, path, message: `${path} is in the language ${lang}, which is not in the registry of languages. It is ignored.`});
                 continue;
@@ -181,7 +195,11 @@ export function resolveProduct(lines: LineInput[], languages: LanguageDef[]): Re
                 issues.push({level: 'error', code: 'duplicate-page', line: line.id, path, message: `${key} exists as .md and .mdx in the same line.`});
                 continue;
             }
-            pages.set(key, {lang, id, ext: ext as '.md' | '.mdx', line: line.id, path, content, data: parseFrontmatter(content).data});
+            const parsed = parseFrontmatter(content);
+            if (parsed.error) {
+                issues.push({level: 'error', code: 'invalid-frontmatter', line: line.id, path, message: `The front matter of ${path} is not valid YAML: ${parsed.error} A value with a colon must be in quotes.`});
+            }
+            pages.set(key, {lang, id, ext: ext as '.md' | '.mdx', line: line.id, path, content, data: parsed.data});
         }
         pagesOf.set(line.id, pages);
         assetsOf.set(line.id, assets);

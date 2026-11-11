@@ -1,0 +1,82 @@
+---
+/**
+ * The navigation of a page of a product shows only that product, in the version the reader is in: its overview and its sections. The
+ * previous and next pages follow the same list, so a reader never ends up in another version by turning the page.
+ */
+import Default from '@astrojs/starlight/components/Sidebar.astro';
+import MIcon from './MIcon.astro';
+import {localised, productUrl, site, t} from '../lib/site';
+
+const route = Astro.locals.starlightRoute;
+const data = route.entry.data as {product?: string; line?: string};
+const product = site().products.find((candidate) => candidate.slug === data.product);
+
+type Entry = (typeof route.sidebar)[number];
+
+/** The entries of the group that holds the overview of the version: that group is the navigation of the version. */
+function groupOf(entries: Entry[], overview: string): Entry[] | undefined {
+    for (const entry of entries) {
+        if (entry.type !== 'group') {
+            continue;
+        }
+        if (entry.entries.some((child) => child.type === 'link' && child.href === overview)) {
+            return entry.entries;
+        }
+        const inner = groupOf(entry.entries, overview);
+        if (inner) {
+            return inner;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * A folder of the technical documentation that holds only one page (the card of a use case) is that page, and the folder of the cards is
+ * named in the language of the reader, not by the name of the folder.
+ */
+function tidy(entries: Entry[]): Entry[] {
+    return entries.map((entry) => {
+        if (entry.type !== 'group') {
+            return entry;
+        }
+        const inner = tidy(entry.entries);
+        if (inner.length === 1 && inner[0].type === 'link') {
+            return inner[0];
+        }
+        const key = `tech.${entry.label}`;
+        return {...entry, label: t(route.lang, key) !== key ? t(route.lang, key) : entry.label, entries: inner};
+    });
+}
+
+const links = (entries: Entry[]): Array<Extract<Entry, {type: 'link'}>> => entries.flatMap((entry) => (entry.type === 'link' ? [entry] : links(entry.entries)));
+
+if (product && data.line) {
+    const own = groupOf(route.sidebar, productUrl(route.lang, product, data.line));
+    if (own) {
+        route.sidebar = tidy(own);
+        const all = links(route.sidebar);
+        const here = all.findIndex((link) => link.isCurrent);
+        route.pagination = {prev: here > 0 ? all[here - 1] : undefined, next: here >= 0 ? all[here + 1] : undefined};
+    }
+}
+---
+
+{
+    product && data.line && (
+        <div class="d-side-ctx">
+            <b>
+                <MIcon name="extension-rounded" />
+                {localised(product.title, route.lang)}
+            </b>
+            <div class="d-pillrow">
+                {[...product.lines].reverse().map((candidate) => (
+                    <a class="d-pill" href={productUrl(route.lang, product, candidate.id)} aria-current={candidate.id === data.line ? 'true' : undefined}>
+                        <MIcon name="call-split-rounded" />
+                        {candidate.label}
+                    </a>
+                ))}
+            </div>
+        </div>
+    )
+}
+<Default {...Astro.props}><slot /></Default>
