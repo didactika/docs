@@ -2,6 +2,7 @@ import {existsSync, readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {defineConfig} from 'astro/config';
 import starlight from '@astrojs/starlight';
+import rehypeNowrapIds from './src/lib/rehype-nowrap-ids';
 import type {StarlightUserConfig} from '@astrojs/starlight/types';
 
 interface Language {
@@ -89,6 +90,7 @@ export default defineConfig({
     site: 'https://docs.didactika.org',
     trailingSlash: 'always',
     build: {format: 'directory'},
+    markdown: {rehypePlugins: [rehypeNowrapIds]},
     // In Docker the files change on the other side of a mount, where the system does not tell the watcher; polling does the same job.
     vite: {server: {watch: {usePolling: process.env.DOCS_POLL === '1'}}},
     integrations: [
