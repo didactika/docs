@@ -114,7 +114,7 @@ export default defineConfig({
                 {
                     // A hyphen is a place where a browser may break a line: keep identifiers such as UC-001 on one line.
                     tag: 'script',
-                    content: "document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.sl-markdown-content td,.sl-markdown-content th').forEach(function(c){if(/^[A-Z]{2,5}-\d{2,4}$/.test(c.textContent.trim())){c.classList.add('nowrap');}});});",
+                    content: "document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.sl-markdown-content td,.sl-markdown-content th').forEach(function(c){if(/^[A-Z]{2,5}-[0-9]{2,4}$/.test(c.textContent.trim())){c.classList.add('nowrap');}});});",
                 },
                 {tag: 'link', attrs: {rel: 'icon', href: '/brand/favicon.svg', type: 'image/svg+xml'}},
                 {tag: 'link', attrs: {rel: 'icon', href: '/brand/favicon-32x32.png', sizes: '32x32', type: 'image/png'}},
