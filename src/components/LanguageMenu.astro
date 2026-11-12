@@ -57,6 +57,9 @@ const filterable = languages.length > 6;
 
 <script is:inline>
     document.querySelectorAll('[data-lang-menu]').forEach(function (menu) {
+        menu.querySelectorAll('a[hreflang]').forEach(function (link) {
+            link.addEventListener('click', function () { try { localStorage.setItem('didactika-lang', JSON.stringify({v: link.hreflang, at: Date.now()})); } catch (error) { /* optional */ } });
+        });
         var filter = menu.querySelector('[data-lang-filter]');
         var items = menu.querySelectorAll('[data-lang-item]');
         var empty = menu.querySelector('.d-lang-empty');

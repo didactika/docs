@@ -14,6 +14,8 @@ const codes = site().languages.map((language) => language.code);
         <link rel="canonical" href="/en/" />
         <script is:inline define:vars={{codes}}>
             var wanted = (navigator.language || 'en').slice(0, 2).toLowerCase();
+            // A language chosen in the menu is kept for 30 days; after that the language of the browser decides again.
+            try { var saved = JSON.parse(localStorage.getItem('didactika-lang')); if (saved && Date.now() - saved.at < 2592000000) { wanted = saved.v; } } catch (error) { /* no storage */ }
             location.replace('/' + (codes.indexOf(wanted) >= 0 ? wanted : 'en') + '/');
         </script>
     </head>
