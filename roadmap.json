@@ -10,16 +10,6 @@
     "summary": {"en": "Restyles the icons of the whole site, a category, a course or an activity from one visual designer, with no theme changes and no code.", "es": "Cambia el estilo de los iconos de todo el sitio, de una categoría, un curso o una actividad desde un único diseñador visual, sin tocar el tema ni escribir código."}
   },
   {
-    "component": "local_autograder", "repo": "didactika/moodle-local_autograder",
-    "title": {"en": "Autograder", "es": "Autocalificador"},
-    "summary": {"en": "Automatically grades the completed activities that a teacher has not graded after the deadline.", "es": "Califica automáticamente las actividades completadas que el docente no ha calificado pasada la fecha límite."}
-  },
-  {
-    "component": "report_autograder", "repo": "didactika/moodle-report_autograder",
-    "title": {"en": "Autograder report", "es": "Informe del autocalificador"},
-    "summary": {"en": "Reviews what the Autograder graded, what is pending and what failed, per activity, course or site.", "es": "Revisa lo que calificó el Autocalificador, lo que está pendiente y lo que falló, por actividad, curso o sitio."}
-  },
-  {
     "component": "local_filebank", "repo": "didactika/moodle-local_filebank",
     "title": {"en": "FileBank", "es": "FileBank"},
     "summary": {"en": "Organises the public files of related courses into a reusable library, with profiles that say which courses belong together.", "es": "Organiza los archivos públicos de cursos relacionados en una biblioteca reutilizable, con perfiles que indican qué cursos van juntos."}
