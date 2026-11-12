@@ -28,7 +28,7 @@ const filterable = languages.length > 6;
         <MIcon name="expand-more-rounded" />
     </summary>
     <div class="d-dd-menu d-lang-menu">
-        <p class="d-menu-title">{t(lang, 'language')} <small>{current?.name}</small></p>
+        <p class="d-menu-title">{t(lang, 'language')}</p>
         {
             filterable && (
                 <label class="d-lang-filter">
@@ -44,8 +44,7 @@ const filterable = languages.length > 6;
                         <a href={inLanguage(language.code)} hreflang={language.code} lang={language.code} aria-current={language.code === lang ? 'true' : undefined}>
                             <span class="d-lang-code">{language.code}</span>
                             <span class="d-lang-name">{language.name}</span>
-                            {coverage[language.code] !== undefined && coverage[language.code] < 100 && <small>{coverage[language.code]}%</small>}
-                            {language.code === lang && <MIcon name="check-rounded" />}
+                                            {language.code === lang && <MIcon name="check-rounded" />}
                         </a>
                     </li>
                 ))

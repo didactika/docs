@@ -226,6 +226,8 @@ dialog.d-search::backdrop { background: rgb(2 8 10 / 60%); backdrop-filter: blur
 .sl-markdown-content { font-size: 0.9375rem; line-height: 1.7; }
 .sl-markdown-content :not(a, strong, em, del, span, input, code, br, svg, path):not(:where(.not-content *)) + :not(a, strong, em, del, span, input, code, br, svg, path, :where(.not-content *)) { margin-top: 1.1rem; }
 .sl-markdown-content .sl-heading-wrapper.level-h2 { margin-top: 2.6rem; padding-top: 1.4rem; border-top: 1px solid var(--line); }
+/* The first section of a page needs no line nor room above it: the title already closes the head. */
+.sl-markdown-content > .sl-heading-wrapper.level-h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
 .sl-markdown-content h2 { margin-top: 0; font: 700 1.55rem/1.25 var(--display); letter-spacing: -0.015em; }
 .sl-markdown-content h3 { margin-top: 1.9rem; font: 600 1.15rem/1.3 var(--display); }
 .sl-markdown-content h2 a, .sl-markdown-content h3 a { color: inherit; }
@@ -358,6 +360,23 @@ a.d-chip:hover { color: var(--ink); }
 .d-lang-list a[aria-current='true'] .d-lang-code { background: var(--accent); color: var(--accent-ink); }
 .d-lang-name { flex: 1; }
 .d-lang-empty { margin: 0; padding: 0.8rem; color: var(--muted); font-size: 0.85rem; }
+.d-lang-list a[aria-current='true'] .mi { margin-inline-start: auto; }
+
+/* On a phone the menu is a sheet over the foot of the screen: full width, large rows, and the page behind it dimmed. */
+@media (max-width: 40rem) {
+    .d-lang[open]::before { content: ''; position: fixed; inset: 0; z-index: 59; background: rgb(2 8 10 / 45%); }
+    .d-lang .d-dd-menu {
+        position: fixed; inset: auto 0 0 0; z-index: 60; width: auto; max-width: none; padding: 0.4rem 0.75rem 1rem; border-width: 1px 0 0;
+        border-radius: 18px 18px 0 0; box-shadow: 0 -12px 40px rgb(2 8 10 / 28%);
+    }
+    .d-lang .d-dd-menu::before { content: ''; justify-self: center; width: 2.5rem; height: 0.28rem; margin: 0.3rem 0 0.5rem; border-radius: 99px; background: var(--line); }
+    .d-menu-title { padding: 0.2rem 0.4rem 0.4rem; font-size: 0.72rem; }
+    .d-lang-filter { margin: 0.2rem 0 0.4rem; }
+    .d-lang-filter input { height: 2.6rem; font-size: 1rem; }
+    .d-lang-list { max-height: 55vh; }
+    .d-lang-list a { padding: 0.75rem 0.6rem; font-size: 1rem; }
+    .d-lang-code { min-width: 2.2rem; height: 1.7rem; }
+}
 
 /* -------------------------------------------------------------- screenshots ---- */
 

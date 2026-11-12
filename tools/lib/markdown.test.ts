@@ -116,6 +116,11 @@ describe('the pages of a technical model', () => {
         assert.equal(out, `[card](${base}/design/use-cases/a/#tests) ![d](${assets}/en/technical/domain/domain-model.svg) [t](${assets}/en/technical/domain/traceability.csv)`);
     });
 
+    it('writes the address in lower case, as Starlight does with the name of a folder', () => {
+        const out = resolveRelativeLinks('[card](./use-cases/createSchema/README.md)', 'technical/analysis/index', 'en', base, assets);
+        assert.equal(out, `[card](${base}/technical/analysis/use-cases/createschema/)`);
+    });
+
     it('leaves absolute links, anchors, schemes and code as they are', () => {
         const text = '[a](https://x.org) [b](#top) [c](/en/x/) [d](page:guides/x)\n```\n[e](./f.md)\n```\n';
         assert.equal(resolveRelativeLinks(text, 'technical/index', 'en', base, assets), text);

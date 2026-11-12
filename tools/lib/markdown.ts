@@ -122,7 +122,7 @@ export function resolveRelativeLinks(markdown: string, pageId: string, lang: str
             }
             const path = parts.join('/');
             if (/\.mdx?$/.test(path)) {
-                const id = path.replace(/\.mdx?$/, '').replace(/(^|\/)README$/, '$1index').replace(/(^|\/)index$/, '');
+                const id = path.replace(/\.mdx?$/, '').replace(/(^|\/)README$/, '$1index').replace(/(^|\/)index$/, '').toLowerCase(); // Starlight writes every address in lower case (createSchema is createschema)
                 return `](${base}${id ? `/${id}` : ''}/${anchor})`;
             }
             return `](${assetBase}/${lang}/${path}${anchor})`;
