@@ -35,7 +35,7 @@ const titleCase = (name: string): string => name.replace(/-/g, ' ').replace(/^./
 
 const kinds = [
     {kind: 'plugin', label: 'Plugins', es: 'Plugins', dir: 'plugins'},
-    {kind: 'package', label: 'Packages', es: 'Paquetes', dir: 'packages'},
+    {kind: 'package', label: 'npm packages', es: 'Paquetes npm', dir: 'packages'},
 ] as const;
 
 /**
