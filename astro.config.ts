@@ -109,7 +109,7 @@ export default defineConfig({
             head: [
                 {
                     tag: 'script',
-                    content: "(function(){var a=new URLSearchParams(location.search).get('mode');if(a==='dark'||a==='light'){try{localStorage.setItem('starlight-theme',a);}catch(e){}document.documentElement.dataset.theme=a;}})();",
+                    content: "(function(){try{var at=Number(localStorage.getItem('didactika-theme-at'));if(!at||Date.now()-at>2592000000){localStorage.removeItem('starlight-theme');}}catch(e){}var a=new URLSearchParams(location.search).get('mode');if(a==='dark'||a==='light'){try{localStorage.setItem('starlight-theme',a);}catch(e){}document.documentElement.dataset.theme=a;}})();",
                 },
                 {tag: 'link', attrs: {rel: 'icon', href: '/brand/favicon.svg', type: 'image/svg+xml'}},
                 {tag: 'link', attrs: {rel: 'icon', href: '/brand/favicon-32x32.png', sizes: '32x32', type: 'image/png'}},

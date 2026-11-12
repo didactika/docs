@@ -38,8 +38,8 @@ const language = site().languages.find((candidate) => candidate.code === lang);
                 var theme = null;
                 // ?mode=dark or ?mode=light opens the page in that theme, as in the design system.
                 var asked = new URLSearchParams(location.search).get('mode');
-                try { if (asked === 'dark' || asked === 'light') { localStorage.setItem('starlight-theme', asked); } theme = localStorage.getItem('starlight-theme'); } catch (error) { theme = asked; }
-                if (theme !== 'light' && theme !== 'dark') { theme = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; }
+                try { var at = Number(localStorage.getItem('didactika-theme-at')); if (!at || Date.now() - at > 2592000000) { localStorage.removeItem('starlight-theme'); } if (asked === 'dark' || asked === 'light') { localStorage.setItem('starlight-theme', asked); } theme = localStorage.getItem('starlight-theme'); } catch (error) { theme = asked; }
+                if (theme !== 'light' && theme !== 'dark') { theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
                 document.documentElement.dataset.theme = theme;
             })();
         </script>
