@@ -43,6 +43,11 @@ function tidy(entries: Entry[]): Entry[] {
         if (inner.length === 1 && inner[0].type === 'link') {
             return inner[0];
         }
+        // The use cases go by their number (UC-002 before UC-010), not by the name of their folder.
+        const number = (item: Entry): number => Number(/^UC-(\d+)/.exec(item.type === 'link' ? item.label : '')?.[1] ?? Infinity);
+        if (inner.length > 1 && inner.every((item) => Number.isFinite(number(item)))) {
+            inner.sort((a, b) => number(a) - number(b));
+        }
         const key = `tech.${entry.label}`;
         return {...entry, label: t(route.lang, key) !== key ? t(route.lang, key) : entry.label, entries: inner};
     });
