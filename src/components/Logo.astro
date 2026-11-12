@@ -1,7 +1,7 @@
 ---
 /**
- * The mark of Didactika Docs, built as the one of the design system: the book of Didactika on a white tile, with the handles of a selection
- * on its corners and a teal pill that says what the site is ("DOC", where the design system says "UI").
+ * The mark of Didactika Docs, built as the one of the design system: the book of Didactika on a white tile and
+ * a teal pill that says what the site is ("DOC", where the design system says "UI").
  */
 interface Props {
     size?: 'sm' | 'lg' | 'xl';
@@ -11,6 +11,5 @@ const {size = 'sm'} = Astro.props;
 
 <span class:list={['d-logo', size !== 'sm' && `is-${size}`]} aria-hidden="true">
     <img src="/brand/didactika-logo.png" alt="" width="64" height="64" />
-    <i class="h h1"></i><i class="h h2"></i><i class="h h3"></i>
     <b class="d-logo-tag">DOC</b>
 </span>
