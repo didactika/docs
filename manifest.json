@@ -7,6 +7,14 @@
     {
       "repo": "didactika/moodle-local_servicemanager",
       "kind": "plugin"
+    },
+    {
+      "repo": "didactika/moodle-local_autograder",
+      "kind": "plugin"
+    },
+    {
+      "repo": "didactika/moodle-report_autograder",
+      "kind": "plugin"
     }
   ]
 }
