@@ -246,6 +246,7 @@ dialog.d-search::backdrop { background: rgb(2 8 10 / 60%); backdrop-filter: blur
 .sl-markdown-content table { display: table; width: 100%; border: 1px solid var(--line); border-radius: var(--radius); border-collapse: separate; border-spacing: 0; overflow: hidden; font-size: 0.875rem; }
 .sl-markdown-content :is(th, td) { padding: 0.65rem 0.85rem; border: 0; border-bottom: 1px solid var(--line); text-align: start; vertical-align: top; }
 .sl-markdown-content tr:last-child td { border-bottom: 0; }
+.sl-markdown-content :is(td, th).nowrap { white-space: nowrap; }
 .sl-markdown-content th { background: var(--panel-2); color: var(--muted); font: 600 0.72rem/1.2 var(--font); letter-spacing: 0.06em; text-transform: uppercase; }
 .sl-markdown-content tbody tr:hover td { background: color-mix(in srgb, var(--accent) 5%, transparent); }
 

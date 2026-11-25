@@ -111,6 +111,11 @@ export default defineConfig({
                     tag: 'script',
                     content: "(function(){try{var at=Number(localStorage.getItem('didactika-theme-at'));if(!at||Date.now()-at>2592000000){localStorage.removeItem('starlight-theme');}}catch(e){}var a=new URLSearchParams(location.search).get('mode');if(a==='dark'||a==='light'){try{localStorage.setItem('starlight-theme',a);}catch(e){}document.documentElement.dataset.theme=a;}})();",
                 },
+                {
+                    // A hyphen is a place where a browser may break a line: keep identifiers such as UC-001 on one line.
+                    tag: 'script',
+                    content: "document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.sl-markdown-content td,.sl-markdown-content th').forEach(function(c){if(/^[A-Z]{2,5}-[0-9]{2,4}$/.test(c.textContent.trim())){c.classList.add('nowrap');}});});",
+                },
                 {tag: 'link', attrs: {rel: 'icon', href: '/brand/favicon.svg', type: 'image/svg+xml'}},
                 {tag: 'link', attrs: {rel: 'icon', href: '/brand/favicon-32x32.png', sizes: '32x32', type: 'image/png'}},
                 {tag: 'link', attrs: {rel: 'icon', href: '/brand/favicon-16x16.png', sizes: '16x16', type: 'image/png'}},
