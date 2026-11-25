@@ -15,6 +15,10 @@
     {
       "repo": "didactika/moodle-report_autograder",
       "kind": "plugin"
+    },
+    {
+      "repo": "didactika/moodle-local_extendednav",
+      "kind": "plugin"
     }
   ]
 }
